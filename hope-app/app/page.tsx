@@ -57,15 +57,27 @@ export default function Home() {
   }
 
   async function signInWithGoogle() {
-    const { error} = await supabase.auth.signInWithOAuth({
+    console.log('🔵 Attempting Google sign-in...');
+    console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+    console.log('Redirect to:', window.location.origin);
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined
+        redirectTo: window.location.origin
       }
     });
+
+    console.log('🔵 OAuth Response:', { data, error });
+
     if (error) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
       alert('Failed to login: ' + error.message);
+    } else if (data?.url) {
+      console.log('✅ Redirecting to:', data.url);
+      window.location.href = data.url;
+    } else {
+      console.warn('⚠️ No redirect URL returned');
     }
   }
 
