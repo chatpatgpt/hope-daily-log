@@ -1,22 +1,24 @@
 import type { Metadata } from "next";
-import { Fraunces, Outfit } from "next/font/google";
+import { Fredoka, Bubblegum_Sans } from "next/font/google";
 import "./globals.css";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const fredoka = Fredoka({
+  variable: "--font-fredoka",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const bubblegum = Bubblegum_Sans({
+  variable: "--font-bubblegum",
   subsets: ["latin"],
+  weight: "400",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Hope's Habit Tracker",
-  description: "Building better habits together, one walk at a time",
+  title: "Hope's Dog Adventure! 🐕",
+  description: "Track walks and celebrate wins with Hope!",
 };
 
 export default function RootLayout({
@@ -27,7 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${outfit.variable} h-full antialiased`}
+      className={`${fredoka.variable} ${bubblegum.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
