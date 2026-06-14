@@ -1,0 +1,6 @@
+{
+  "buildCommand": "cd hope-app && npm run build",
+  "devCommand": "cd hope-app && npm run dev",
+  "installCommand": "cd hope-app && npm install",
+  "outputDirectory": "hope-app/.next"
+}
