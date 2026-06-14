@@ -155,10 +155,10 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className={`${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'} min-h-screen flex items-center justify-center`}>
+      <div className={`${darkMode ? 'dark' : ''} min-h-screen flex items-center justify-center bg-hope-gradient`}>
         <div className="text-center">
-          <div className="text-4xl mb-4">🐕</div>
-          <div className="text-lg">Loading...</div>
+          <div className="text-6xl mb-6 float-slow">🐕</div>
+          <div className="text-xl font-serif font-semibold" style={{ color: 'var(--text-primary)' }}>Loading Hope...</div>
         </div>
       </div>
     );
@@ -166,18 +166,42 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className={`${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'} min-h-screen flex items-center justify-center p-4`}>
-        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-xl p-8 max-w-md w-full text-center`}>
-          <div className="text-6xl mb-4">🐕</div>
-          <h1 className="text-3xl font-bold mb-2">Hope&apos;s Habit Tracker</h1>
-          <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-8`}>
-            Track Hope&apos;s walks and accidents to build better habits together
+      <div className={`${darkMode ? 'dark' : ''} min-h-screen flex items-center justify-center p-4 bg-hope-gradient relative overflow-hidden`}>
+        {/* Decorative blobs */}
+        <div className="blob" style={{
+          width: '300px',
+          height: '300px',
+          background: 'var(--accent-pink)',
+          top: '10%',
+          left: '10%'
+        }} />
+        <div className="blob" style={{
+          width: '400px',
+          height: '400px',
+          background: 'var(--accent-gold)',
+          bottom: '10%',
+          right: '10%',
+          animationDelay: '5s'
+        }} />
+
+        <div className="glass-card rounded-3xl p-10 max-w-md w-full text-center relative z-10 slide-up">
+          <div className="text-7xl mb-6 float-slow">🐕</div>
+          <h1 className="text-4xl font-serif font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+            Hope&apos;s Journey
+          </h1>
+          <p className="text-lg mb-8" style={{ color: 'var(--text-secondary)' }}>
+            Building better habits together,<br />one walk at a time
           </p>
           <button
             onClick={signInWithGoogle}
-            className="w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 font-semibold py-3 px-6 rounded-lg flex items-center justify-center gap-3 transition"
+            className="btn-hope w-full py-4 px-6 rounded-2xl font-semibold text-lg flex items-center justify-center gap-3 transition-all"
+            style={{
+              background: 'var(--gradient-warm)',
+              color: 'white',
+              boxShadow: '0 8px 24px var(--shadow-soft)'
+            }}
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -187,7 +211,11 @@ export default function Home() {
           </button>
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="mt-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+            className="mt-6 px-6 py-2 rounded-full transition-all font-medium"
+            style={{
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-secondary)'
+            }}
           >
             {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </button>
@@ -197,17 +225,32 @@ export default function Home() {
   }
 
   return (
-    <div className={`max-w-[430px] mx-auto ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'} min-h-screen pb-20`}>
-      <header className={`${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm p-4`}>
-        <div className="flex justify-between items-center mb-2">
-          <h1 className="text-xl font-bold">🐕 Hope&apos;s Habit Tracker</h1>
+    <div className={`max-w-[430px] mx-auto ${darkMode ? 'dark' : ''} min-h-screen pb-24 relative`}
+      style={{ background: 'var(--bg-primary)' }}>
+
+      {/* Decorative background blob */}
+      <div className="blob" style={{
+        width: '250px',
+        height: '250px',
+        background: 'var(--accent-warm)',
+        top: '5%',
+        right: '5%',
+        opacity: 0.15
+      }} />
+
+      <header className="glass-card rounded-b-3xl p-5 mb-4 shadow-lg">
+        <div className="flex justify-between items-center mb-3">
+          <h1 className="text-2xl font-serif font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <span className="float-slow">🐕</span> Hope
+          </h1>
           <div className="flex items-center gap-3">
-            <span className={`text-xs ${isOnline ? 'text-green-500' : 'text-red-500'}`}>
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ${isOnline ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}`}>
               {isOnline ? '● Synced' : '● Offline'}
             </span>
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="p-2 rounded-full transition-all"
+              style={{ background: 'var(--bg-secondary)' }}
             >
               {darkMode ? '☀️' : '🌙'}
             </button>
@@ -219,39 +262,45 @@ export default function Home() {
               <img
                 src={user.user_metadata.avatar_url}
                 alt="Profile"
-                className="w-6 h-6 rounded-full"
+                className="w-7 h-7 rounded-full"
+                style={{ border: '2px solid var(--accent-warm)' }}
               />
             )}
-            <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>
+            <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>
               {user.user_metadata.full_name || user.email}
             </span>
           </div>
           <button
             onClick={signOut}
-            className={`text-xs ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}
+            className="text-xs font-medium hover:opacity-70 transition-opacity"
+            style={{ color: 'var(--text-muted)' }}
           >
             Sign Out
           </button>
         </div>
       </header>
 
-      <main className="p-4">
+      <main className="px-4">
         {activeTab === 'home' && <HomeTab logs={logs} streakData={streakData} darkMode={darkMode} />}
         {activeTab === 'log' && <LogTab onLog={addLog} setShowLogModal={setShowLogModal} showLogModal={showLogModal} darkMode={darkMode} />}
         {activeTab === 'trends' && <TrendsTab logs={logs} darkMode={darkMode} />}
       </main>
 
-      <nav className={`fixed bottom-0 left-0 right-0 ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg`}>
-        <div className="max-w-[430px] mx-auto flex justify-around p-2">
+      <nav className="fixed bottom-0 left-0 right-0 glass-card rounded-t-3xl shadow-2xl">
+        <div className="max-w-[430px] mx-auto flex justify-around p-3 gap-2">
           {(['home', 'log', 'trends'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-3 text-center rounded-lg font-medium transition ${
-                activeTab === tab
-                  ? 'bg-green-500 text-white'
-                  : darkMode ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              className="btn-hope flex-1 py-3 rounded-2xl font-semibold text-sm transition-all"
+              style={activeTab === tab ? {
+                background: 'var(--gradient-warm)',
+                color: 'white',
+                boxShadow: '0 4px 16px var(--shadow-soft)'
+              } : {
+                background: 'transparent',
+                color: 'var(--text-muted)'
+              }}
             >
               {tab === 'home' && '🏠 Home'}
               {tab === 'log' && '✏️ Log'}
@@ -274,53 +323,98 @@ function HomeTab({ logs, streakData, darkMode }: { logs: HopeLog[], streakData: 
   const todayAccidents = todayLogs.filter(l => l.type === 'accident');
 
   return (
-    <div className="space-y-4">
-      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-md p-6`}>
-        <h2 className="text-lg font-bold mb-4">🔥 Streak Tracker</h2>
-        <div className="grid grid-cols-2 gap-4">
+    <div className="space-y-5">
+      {/* Streak Tracker - Hero Card */}
+      <div className="glass-card rounded-3xl p-6 slide-up relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20"
+          style={{ background: 'var(--accent-gold)' }} />
+
+        <div className="flex items-center gap-2 mb-5">
+          <span className="text-2xl">🔥</span>
+          <h2 className="text-xl font-serif font-bold" style={{ color: 'var(--text-primary)' }}>
+            Streak
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 relative z-10">
           <div className="text-center">
-            <div className="text-3xl font-bold text-green-500">{streakData.currentStreak}</div>
-            <div className="text-sm text-gray-500">Current Streak</div>
+            <div className={`text-5xl font-bold mb-2 ${streakData.currentStreak > 0 ? 'pulse-warm' : ''}`}
+              style={{ color: 'var(--accent-green)' }}>
+              {streakData.currentStreak}
+            </div>
+            <div className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+              Current Streak
+            </div>
+            <div className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+              {streakData.currentStreak > 0 ? '🎉 Keep it up!' : 'Start your journey'}
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-blue-500">{streakData.maxStreak}</div>
-            <div className="text-sm text-gray-500">Best Streak</div>
+            <div className="text-5xl font-bold mb-2" style={{ color: 'var(--accent-gold)' }}>
+              {streakData.maxStreak}
+            </div>
+            <div className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+              Best Streak
+            </div>
+            <div className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+              {streakData.maxStreak > 0 ? '🏆 Personal best' : 'No record yet'}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-md p-6`}>
-        <h2 className="text-lg font-bold mb-4">📅 Today&apos;s Summary</h2>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="text-center p-4 bg-green-100 dark:bg-green-900 rounded-lg">
-            <div className="text-2xl font-bold text-green-700 dark:text-green-300">{todayWalks.length}</div>
-            <div className="text-sm">Walks</div>
+      {/* Today's Summary */}
+      <div className="glass-card rounded-3xl p-6 slide-up stagger-1">
+        <h2 className="text-xl font-serif font-bold mb-5 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+          <span>📅</span> Today
+        </h2>
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="rounded-2xl p-5 text-center relative overflow-hidden"
+            style={{ background: 'var(--gradient-success)' }}>
+            <div className="text-3xl font-bold text-white mb-1">{todayWalks.length}</div>
+            <div className="text-sm text-white/90 font-medium">Walks</div>
+            <div className="absolute -bottom-4 -right-4 text-6xl opacity-20">🚶</div>
           </div>
-          <div className="text-center p-4 bg-amber-100 dark:bg-amber-900 rounded-lg">
-            <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">{todayAccidents.length}</div>
-            <div className="text-sm">Accidents</div>
+          <div className="rounded-2xl p-5 text-center relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-warm) 100%)' }}>
+            <div className="text-3xl font-bold text-white mb-1">{todayAccidents.length}</div>
+            <div className="text-sm text-white/90 font-medium">Accidents</div>
+            <div className="absolute -bottom-4 -right-4 text-6xl opacity-20">⚠️</div>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400">Recent Activity</h3>
-          {todayLogs.slice(0, 5).map(log => (
-            <div key={log.id} className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-              <div className="flex justify-between items-center">
-                <span className="font-medium">
+        {/* Recent Activity */}
+        <div className="space-y-3">
+          <h3 className="font-semibold text-sm uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
+            Recent Activity
+          </h3>
+          {todayLogs.slice(0, 5).map((log, idx) => (
+            <div key={log.id} className={`p-4 rounded-xl slide-up stagger-${idx + 2}`}
+              style={{ background: 'var(--bg-secondary)' }}>
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                   {log.type === 'walk' ? '🚶 Walk' : `${log.subtype === 'pee' ? '💧' : '💩'} Accident`}
                 </span>
-                <span className="text-sm text-gray-500">
+                <span className="text-xs font-medium px-2 py-1 rounded-full"
+                  style={{ background: 'var(--bg-primary)', color: 'var(--text-muted)' }}>
                   {new Date(log.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                 </span>
               </div>
-              <div className="text-sm text-gray-500 mt-1">
-                {log.person} {log.duration && `• ${log.duration} min`}
+              <div className="text-sm flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
+                <span>{log.person}</span>
+                {log.duration && <span>• {log.duration} min</span>}
               </div>
             </div>
           ))}
           {todayLogs.length === 0 && (
-            <p className="text-gray-400 text-sm text-center py-4">No activity yet today</p>
+            <div className="text-center py-8 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+              <div className="text-4xl mb-2 opacity-50">🌅</div>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                No activity yet today<br />
+                <span className="text-xs">Start with a morning walk!</span>
+              </p>
+            </div>
           )}
         </div>
       </div>
@@ -335,21 +429,50 @@ function LogTab({ onLog, setShowLogModal, showLogModal, darkMode }: {
   darkMode: boolean
 }) {
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold mb-4">Quick Log</h2>
+    <div className="space-y-6 py-4">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-serif font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+          Quick Log
+        </h2>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          Track Hope&apos;s daily activities
+        </p>
+      </div>
 
       <button
         onClick={() => setShowLogModal('walk')}
-        className="w-full p-6 bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-lg font-bold text-lg"
+        className="btn-hope w-full p-8 rounded-3xl font-bold text-xl shadow-2xl relative overflow-hidden slide-up"
+        style={{
+          background: 'var(--gradient-success)',
+          color: 'white'
+        }}
       >
-        🚶 Log Walk
+        <div className="absolute top-4 right-4 text-6xl opacity-20">🚶</div>
+        <div className="relative z-10 flex items-center justify-center gap-3">
+          <span className="text-3xl">🚶</span>
+          <span>Log Walk</span>
+        </div>
+        <div className="text-sm mt-2 opacity-90 font-normal">
+          Record a successful walk
+        </div>
       </button>
 
       <button
         onClick={() => setShowLogModal('accident')}
-        className="w-full p-6 bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-lg font-bold text-lg"
+        className="btn-hope w-full p-8 rounded-3xl font-bold text-xl shadow-2xl relative overflow-hidden slide-up stagger-1"
+        style={{
+          background: 'linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-warm) 100%)',
+          color: 'white'
+        }}
       >
-        ⚠️ Log Accident
+        <div className="absolute top-4 right-4 text-6xl opacity-20">⚠️</div>
+        <div className="relative z-10 flex items-center justify-center gap-3">
+          <span className="text-3xl">⚠️</span>
+          <span>Log Accident</span>
+        </div>
+        <div className="text-sm mt-2 opacity-90 font-normal">
+          Track an accident to improve
+        </div>
       </button>
 
       {showLogModal && (
@@ -389,25 +512,36 @@ function LogModal({ type, onClose, onSubmit, darkMode }: {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 w-full max-w-sm`}>
-        <h3 className="text-xl font-bold mb-4">
+    <div className="fixed inset-0 flex items-center justify-center p-4 z-50"
+      style={{ background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(8px)' }}
+      onClick={onClose}>
+      <div className="glass-card rounded-3xl p-8 w-full max-w-sm slide-up"
+        onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-2xl font-serif font-bold mb-6 flex items-center gap-2"
+          style={{ color: 'var(--text-primary)' }}>
           {type === 'walk' ? '🚶 Log Walk' : '⚠️ Log Accident'}
         </h3>
 
         {type === 'accident' && (
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Type</label>
-            <div className="grid grid-cols-2 gap-2">
+          <div className="mb-6">
+            <label className="block text-sm font-semibold mb-3 uppercase tracking-wide"
+              style={{ color: 'var(--text-muted)' }}>
+              Type
+            </label>
+            <div className="grid grid-cols-2 gap-3">
               {(['pee', 'poop'] as const).map(s => (
                 <button
                   key={s}
                   onClick={() => setSubtype(s)}
-                  className={`p-3 rounded-lg font-medium ${
-                    subtype === s
-                      ? 'bg-amber-500 text-white'
-                      : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className="btn-hope p-4 rounded-2xl font-semibold text-lg transition-all"
+                  style={subtype === s ? {
+                    background: 'linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-warm) 100%)',
+                    color: 'white',
+                    boxShadow: '0 4px 16px var(--shadow-soft)'
+                  } : {
+                    background: 'var(--bg-secondary)',
+                    color: 'var(--text-secondary)'
+                  }}
                 >
                   {s === 'pee' ? '💧 Pee' : '💩 Poop'}
                 </button>
@@ -417,34 +551,47 @@ function LogModal({ type, onClose, onSubmit, darkMode }: {
         )}
 
         {type === 'walk' && (
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Duration (optional, minutes)</label>
+          <div className="mb-6">
+            <label className="block text-sm font-semibold mb-3 uppercase tracking-wide"
+              style={{ color: 'var(--text-muted)' }}>
+              Duration (optional)
+            </label>
             <input
               type="number"
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
-              placeholder="e.g., 15"
-              className={`w-full p-3 rounded-lg border ${
-                darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'
-              }`}
+              placeholder="e.g., 15 minutes"
+              className="w-full p-4 rounded-2xl border-2 font-medium transition-all focus:outline-none focus:ring-2"
+              style={{
+                background: 'var(--bg-secondary)',
+                borderColor: 'transparent',
+                color: 'var(--text-primary)',
+                '--tw-ring-color': 'var(--accent-warm)'
+              } as React.CSSProperties}
             />
           </div>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex gap-3 mt-8">
           <button
             onClick={onClose}
-            className={`flex-1 py-3 rounded-lg font-medium ${
-              darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'
-            }`}
+            className="flex-1 py-4 rounded-2xl font-semibold transition-all"
+            style={{
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-secondary)'
+            }}
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="flex-1 py-3 rounded-lg font-medium bg-green-500 text-white hover:bg-green-600"
+            className="btn-hope flex-1 py-4 rounded-2xl font-semibold shadow-lg"
+            style={{
+              background: 'var(--gradient-success)',
+              color: 'white'
+            }}
           >
-            Save
+            Save Log
           </button>
         </div>
       </div>
@@ -486,14 +633,20 @@ function TrendsTab({ logs, darkMode }: { logs: HopeLog[], darkMode: boolean }) {
       const walks = dayLogs.filter(l => l.type === 'walk').length;
       const accidents = dayLogs.filter(l => l.type === 'accident').length;
 
-      let color = darkMode ? '#374151' : '#f3f4f6';
-      if (accidents > 0 && walks === 0) color = '#ef4444';
-      else if (accidents > 0) color = '#f59e0b';
-      else if (walks > 0) color = '#10b981';
+      let color = 'var(--bg-secondary)';
+      let gradient = '';
+      if (accidents > 0 && walks === 0) {
+        gradient = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+      } else if (accidents > 0) {
+        gradient = 'linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-warm) 100%)';
+      } else if (walks > 0) {
+        gradient = 'var(--gradient-success)';
+      }
 
       days.push({
         day: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
         color,
+        gradient,
         walks,
         accidents,
       });
@@ -502,82 +655,119 @@ function TrendsTab({ logs, darkMode }: { logs: HopeLog[], darkMode: boolean }) {
   }, [logs, darkMode]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2 mb-4">
+    <div className="space-y-5 py-2">
+      {/* View Toggle */}
+      <div className="glass-card rounded-2xl p-2 flex gap-2">
         <button
           onClick={() => setView('daily')}
-          className={`flex-1 py-2 rounded-lg font-medium ${
-            view === 'daily'
-              ? 'bg-blue-500 text-white'
-              : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'
-          }`}
+          className="btn-hope flex-1 py-3 rounded-xl font-semibold text-sm transition-all"
+          style={view === 'daily' ? {
+            background: 'var(--gradient-warm)',
+            color: 'white',
+            boxShadow: '0 2px 12px var(--shadow-soft)'
+          } : {
+            background: 'transparent',
+            color: 'var(--text-muted)'
+          }}
         >
-          Daily Summary
+          📊 Daily
         </button>
         <button
           onClick={() => setView('heatmap')}
-          className={`flex-1 py-2 rounded-lg font-medium ${
-            view === 'heatmap'
-              ? 'bg-blue-500 text-white'
-              : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'
-          }`}
+          className="btn-hope flex-1 py-3 rounded-xl font-semibold text-sm transition-all"
+          style={view === 'heatmap' ? {
+            background: 'var(--gradient-warm)',
+            color: 'white',
+            boxShadow: '0 2px 12px var(--shadow-soft)'
+          } : {
+            background: 'transparent',
+            color: 'var(--text-muted)'
+          }}
         >
-          Heatmap
+          🗓️ Heatmap
         </button>
       </div>
 
       {view === 'daily' && (
-        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-md p-4`}>
-          <h3 className="font-bold mb-4">Last 7 Days</h3>
-          <ResponsiveContainer width="100%" height={250}>
+        <div className="glass-card rounded-3xl p-6 slide-up">
+          <h3 className="font-serif font-bold text-xl mb-5" style={{ color: 'var(--text-primary)' }}>
+            Last 7 Days
+          </h3>
+          <ResponsiveContainer width="100%" height={280}>
             <BarChart data={dailyData}>
-              <XAxis dataKey="date" stroke={darkMode ? '#9ca3af' : '#6b7280'} />
-              <YAxis stroke={darkMode ? '#9ca3af' : '#6b7280'} />
+              <XAxis
+                dataKey="date"
+                stroke="var(--text-muted)"
+                style={{ fontSize: '12px', fontWeight: 500 }}
+              />
+              <YAxis
+                stroke="var(--text-muted)"
+                style={{ fontSize: '12px', fontWeight: 500 }}
+              />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: darkMode ? '#1f2937' : '#fff',
+                  background: 'var(--bg-card)',
                   border: 'none',
-                  borderRadius: '8px',
-                  color: darkMode ? '#f3f4f6' : '#111',
+                  borderRadius: '16px',
+                  color: 'var(--text-primary)',
+                  boxShadow: '0 8px 24px var(--shadow-soft)',
+                  padding: '12px 16px',
+                  fontWeight: 600
                 }}
+                cursor={{ fill: 'var(--bg-secondary)', opacity: 0.3 }}
               />
-              <Bar dataKey="walks" fill="#10b981" radius={[8, 8, 0, 0]} />
-              <Bar dataKey="accidents" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="walks" fill="var(--accent-green)" radius={[12, 12, 0, 0]} />
+              <Bar dataKey="accidents" fill="var(--accent-amber)" radius={[12, 12, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       )}
 
       {view === 'heatmap' && (
-        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-md p-4`}>
-          <h3 className="font-bold mb-4">7-Day Activity Map</h3>
-          <div className="space-y-2">
+        <div className="glass-card rounded-3xl p-6 slide-up">
+          <h3 className="font-serif font-bold text-xl mb-5" style={{ color: 'var(--text-primary)' }}>
+            7-Day Activity Map
+          </h3>
+          <div className="space-y-3 mb-6">
             {heatmapData.map((day, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="text-sm font-medium w-24">{day.day}</div>
+              <div key={i} className={`flex items-center gap-3 slide-up stagger-${i + 1}`}>
+                <div className="text-xs font-semibold w-20" style={{ color: 'var(--text-secondary)' }}>
+                  {day.day}
+                </div>
                 <div
-                  className="flex-1 h-12 rounded-lg flex items-center justify-center text-white font-bold"
-                  style={{ backgroundColor: day.color }}
+                  className="flex-1 h-14 rounded-2xl flex items-center justify-center font-bold text-sm shadow-lg transition-all hover:scale-105"
+                  style={{
+                    background: day.gradient || day.color,
+                    color: day.gradient ? 'white' : 'var(--text-muted)'
+                  }}
                 >
-                  {day.walks > 0 && `${day.walks} walks`}
-                  {day.accidents > 0 && ` • ${day.accidents} accidents`}
-                  {day.walks === 0 && day.accidents === 0 && '—'}
+                  {day.walks > 0 && <span>🚶 {day.walks}</span>}
+                  {day.walks > 0 && day.accidents > 0 && <span className="mx-2">•</span>}
+                  {day.accidents > 0 && <span>⚠️ {day.accidents}</span>}
+                  {day.walks === 0 && day.accidents === 0 && <span>—</span>}
                 </div>
               </div>
             ))}
           </div>
-          <div className="mt-4 flex gap-4 text-xs justify-center">
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 rounded bg-green-500"></div>
-              <span>Walks only</span>
+
+          {/* Legend */}
+          <div className="flex gap-4 text-xs justify-center flex-wrap pt-4 border-t"
+            style={{ borderColor: 'var(--bg-secondary)' }}>
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-lg shadow-sm" style={{ background: 'var(--gradient-success)' }}></div>
+              <span style={{ color: 'var(--text-secondary)' }}>Walks only</span>
             </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 rounded bg-amber-500"></div>
-              <span>Both</span>
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-lg shadow-sm" style={{
+                background: 'linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-warm) 100%)'
+              }}></div>
+              <span style={{ color: 'var(--text-secondary)' }}>Mixed</span>
             </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 rounded bg-red-500"></div>
-              <span>Accidents only</span>
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-lg shadow-sm" style={{
+                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+              }}></div>
+              <span style={{ color: 'var(--text-secondary)' }}>Accidents only</span>
             </div>
           </div>
         </div>

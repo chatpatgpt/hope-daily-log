@@ -1,26 +1,246 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light theme - Sunrise warmth */
+  --bg-primary: #FFF9F0;
+  --bg-secondary: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --text-primary: #2D1810;
+  --text-secondary: #6B4E3D;
+  --text-muted: #A68A7B;
+  --accent-warm: #FF8C42;
+  --accent-gold: #FFB84D;
+  --accent-pink: #FF6B9D;
+  --accent-green: #4CAF50;
+  --accent-amber: #FFA726;
+  --shadow-soft: rgba(255, 140, 66, 0.15);
+  --gradient-sunrise: linear-gradient(135deg, #FFE5D4 0%, #FFD4BA 50%, #FFC7A3 100%);
+  --gradient-warm: linear-gradient(135deg, #FF8C42 0%, #FFB84D 100%);
+  --gradient-success: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+}
+
+.dark {
+  /* Dark theme - Twilight calm */
+  --bg-primary: #1A1410;
+  --bg-secondary: #2D2318;
+  --bg-card: #3A2F23;
+  --text-primary: #F5E6D3;
+  --text-secondary: #C9B8A3;
+  --text-muted: #9B8A7A;
+  --accent-warm: #FF9D5C;
+  --accent-gold: #FFC77D;
+  --accent-pink: #FF7BAD;
+  --accent-green: #66BB6A;
+  --accent-amber: #FFB74D;
+  --shadow-soft: rgba(255, 157, 92, 0.25);
+  --gradient-sunrise: linear-gradient(135deg, #3A2F23 0%, #4A3A2D 50%, #5A4A37 100%);
+  --gradient-warm: linear-gradient(135deg, #FF9D5C 0%, #FFC77D 100%);
+  --gradient-success: linear-gradient(135deg, #66BB6A 0%, #81C784 100%);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-outfit);
+  --font-serif: var(--font-fraunces);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* Animated background gradient */
+.bg-hope-gradient {
+  background: var(--gradient-sunrise);
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Floating animation for decorative elements */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(2deg); }
+  66% { transform: translateY(-5px) rotate(-2deg); }
+}
+
+.float-slow {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Pulse animation for important elements */
+@keyframes pulse-warm {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 var(--shadow-soft);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px 10px transparent;
+  }
+}
+
+.pulse-warm {
+  animation: pulse-warm 2s ease-in-out infinite;
+}
+
+/* Streak celebration animation */
+@keyframes celebrate {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.2) rotate(-5deg); }
+  50% { transform: scale(1.1) rotate(5deg); }
+  75% { transform: scale(1.2) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.celebrate {
+  animation: celebrate 0.6s ease-in-out;
+}
+
+/* Slide up entrance animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.4s ease-out forwards;
+}
+
+/* Staggered animations for list items */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* Glass morphism card effect */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 140, 66, 0.1);
+  box-shadow:
+    0 8px 32px rgba(255, 140, 66, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 40px rgba(255, 140, 66, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Organic blob shapes for background decoration */
+.blob {
+  position: absolute;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  filter: blur(40px);
+  opacity: 0.3;
+  z-index: -1;
+  animation: blobMorph 10s ease-in-out infinite;
+}
+
+@keyframes blobMorph {
+  0%, 100% {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%;
+    transform: rotate(90deg) scale(1.1);
+  }
+  50% {
+    border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%;
+    transform: rotate(180deg) scale(0.9);
+  }
+  75% {
+    border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%;
+    transform: rotate(270deg) scale(1.05);
+  }
+}
+
+/* Button hover effects */
+.btn-hope {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-hope::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-hope:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-hope:active {
+  transform: scale(0.95);
+}
+
+/* Progress bar with gradient fill */
+.progress-bar {
+  background: var(--gradient-warm);
+  background-size: 200% 100%;
+  animation: progressShine 2s linear infinite;
+}
+
+@keyframes progressShine {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gradient-warm);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-warm);
+}
+
+/* Smooth transitions for theme switching */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: ease;
+  transition-duration: 0.3s;
 }
