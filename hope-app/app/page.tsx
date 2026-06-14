@@ -45,8 +45,7 @@ export default function Home() {
   useEffect(() => {
     if (user) {
       fetchLogs();
-      const unsubscribe = subscribeToLogs();
-      return unsubscribe;
+      subscribeToLogs();
     }
   }, [user]);
 
