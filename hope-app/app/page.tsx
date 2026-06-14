@@ -157,8 +157,13 @@ export default function Home() {
     return (
       <div className={`${darkMode ? 'dark' : ''} min-h-screen flex items-center justify-center bg-hope-gradient`}>
         <div className="text-center">
-          <div className="text-6xl mb-6 float-slow">🐕</div>
-          <div className="text-xl font-serif font-semibold" style={{ color: 'var(--text-primary)' }}>Loading Hope...</div>
+          <div className="text-8xl mb-6 hop">🐕</div>
+          <div className="text-2xl font-serif font-bold" style={{ color: 'var(--text-primary)' }}>
+            Getting Hope ready...
+          </div>
+          <div className="text-lg mt-2" style={{ color: 'var(--text-secondary)' }}>
+            🦴 Woof woof! 🦴
+          </div>
         </div>
       </div>
     );
@@ -185,12 +190,13 @@ export default function Home() {
         }} />
 
         <div className="glass-card rounded-3xl p-10 max-w-md w-full text-center relative z-10 slide-up">
-          <div className="text-7xl mb-6 float-slow">🐕</div>
-          <h1 className="text-4xl font-serif font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
-            Hope&apos;s Journey
+          <div className="text-8xl mb-6 hop">🐕</div>
+          <h1 className="text-5xl font-serif font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+            Hope&apos;s Adventure! 🌟
           </h1>
-          <p className="text-lg mb-8" style={{ color: 'var(--text-secondary)' }}>
-            Building better habits together,<br />one walk at a time
+          <p className="text-xl mb-8" style={{ color: 'var(--text-secondary)' }}>
+            Help Hope become the best pup!<br />
+            Track walks, celebrate wins! 🎉
           </p>
           <button
             onClick={signInWithGoogle}
@@ -238,21 +244,22 @@ export default function Home() {
         opacity: 0.15
       }} />
 
-      <header className="glass-card rounded-b-3xl p-5 mb-4 shadow-lg">
+      <header className="glass-card rounded-b-3xl p-5 mb-4 shadow-lg"
+        style={{ background: 'linear-gradient(135deg, rgba(255, 217, 61, 0.1) 0%, rgba(255, 107, 53, 0.1) 100%)' }}>
         <div className="flex justify-between items-center mb-3">
-          <h1 className="text-2xl font-serif font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-            <span className="float-slow">🐕</span> Hope
+          <h1 className="text-3xl font-serif font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
+            <span className="text-4xl hop">🐕</span> Hope&apos;s Tracker!
           </h1>
           <div className="flex items-center gap-3">
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${isOnline ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}`}>
-              {isOnline ? '● Synced' : '● Offline'}
+            <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${isOnline ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}`}>
+              {isOnline ? '✓ Ready!' : '✗ Offline'}
             </span>
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-full transition-all"
-              style={{ background: 'var(--bg-secondary)' }}
+              className="p-3 rounded-full transition-all transform hover:scale-110"
+              style={{ background: 'var(--gradient-warm)' }}
             >
-              {darkMode ? '☀️' : '🌙'}
+              <span className="text-xl">{darkMode ? '☀️' : '🌙'}</span>
             </button>
           </div>
         </div>
@@ -262,20 +269,20 @@ export default function Home() {
               <img
                 src={user.user_metadata.avatar_url}
                 alt="Profile"
-                className="w-7 h-7 rounded-full"
-                style={{ border: '2px solid var(--accent-warm)' }}
+                className="w-8 h-8 rounded-full wiggle"
+                style={{ border: '3px solid var(--accent-warm)' }}
               />
             )}
-            <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>
-              {user.user_metadata.full_name || user.email}
+            <span className="font-bold" style={{ color: 'var(--text-secondary)' }}>
+              👋 {user.user_metadata.full_name || user.email}
             </span>
           </div>
           <button
             onClick={signOut}
-            className="text-xs font-medium hover:opacity-70 transition-opacity"
-            style={{ color: 'var(--text-muted)' }}
+            className="text-xs font-bold px-3 py-1.5 rounded-full hover:opacity-80 transition-all"
+            style={{ background: 'var(--bg-secondary)', color: 'var(--text-muted)' }}
           >
-            Sign Out
+            Leave
           </button>
         </div>
       </header>
@@ -286,25 +293,28 @@ export default function Home() {
         {activeTab === 'trends' && <TrendsTab logs={logs} darkMode={darkMode} />}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 glass-card rounded-t-3xl shadow-2xl">
-        <div className="max-w-[430px] mx-auto flex justify-around p-3 gap-2">
+      <nav className="fixed bottom-0 left-0 right-0 glass-card rounded-t-3xl shadow-2xl"
+        style={{ background: 'var(--bg-card)', borderTop: '3px solid var(--accent-warm)' }}>
+        <div className="max-w-[430px] mx-auto flex justify-around p-4 gap-3">
           {(['home', 'log', 'trends'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className="btn-hope flex-1 py-3 rounded-2xl font-semibold text-sm transition-all"
+              className="btn-hope flex-1 py-4 rounded-2xl font-bold text-base transition-all transform hover:scale-105"
               style={activeTab === tab ? {
                 background: 'var(--gradient-warm)',
                 color: 'white',
-                boxShadow: '0 4px 16px var(--shadow-soft)'
+                boxShadow: '0 6px 20px var(--shadow-soft)',
+                border: '2px solid rgba(255, 255, 255, 0.4)'
               } : {
-                background: 'transparent',
-                color: 'var(--text-muted)'
+                background: 'var(--bg-secondary)',
+                color: 'var(--text-muted)',
+                border: '2px solid transparent'
               }}
             >
               {tab === 'home' && '🏠 Home'}
-              {tab === 'log' && '✏️ Log'}
-              {tab === 'trends' && '📊 Trends'}
+              {tab === 'log' && '✏️ Add'}
+              {tab === 'trends' && '📊 Stats'}
             </button>
           ))}
         </div>
@@ -329,90 +339,142 @@ function HomeTab({ logs, streakData, darkMode }: { logs: HopeLog[], streakData: 
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20"
           style={{ background: 'var(--accent-gold)' }} />
 
-        <div className="flex items-center gap-2 mb-5">
-          <span className="text-2xl">🔥</span>
-          <h2 className="text-xl font-serif font-bold" style={{ color: 'var(--text-primary)' }}>
-            Streak
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-3xl hop">🔥</span>
+          <h2 className="text-2xl font-serif font-bold" style={{ color: 'var(--text-primary)' }}>
+            Streak Power!
           </h2>
         </div>
 
         <div className="grid grid-cols-2 gap-6 relative z-10">
           <div className="text-center">
-            <div className={`text-5xl font-bold mb-2 ${streakData.currentStreak > 0 ? 'pulse-warm' : ''}`}
+            <div className={`text-6xl font-bold mb-3 ${streakData.currentStreak > 0 ? 'pulse-warm' : ''}`}
               style={{ color: 'var(--accent-green)' }}>
               {streakData.currentStreak}
             </div>
-            <div className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
-              Current Streak
+            <div className="text-base font-bold" style={{ color: 'var(--text-secondary)' }}>
+              Days Strong! 💪
             </div>
-            <div className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
-              {streakData.currentStreak > 0 ? '🎉 Keep it up!' : 'Start your journey'}
+            <div className="mt-3 text-sm font-medium px-3 py-2 rounded-full"
+              style={{
+                background: streakData.currentStreak > 0 ? 'var(--gradient-success)' : 'var(--bg-secondary)',
+                color: streakData.currentStreak > 0 ? 'white' : 'var(--text-muted)'
+              }}>
+              {streakData.currentStreak > 0 ? '🎉 Amazing!' : '🌟 Let\'s start!'}
             </div>
           </div>
           <div className="text-center">
-            <div className="text-5xl font-bold mb-2" style={{ color: 'var(--accent-gold)' }}>
+            <div className="text-6xl font-bold mb-3" style={{ color: 'var(--accent-gold)' }}>
               {streakData.maxStreak}
             </div>
-            <div className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
-              Best Streak
+            <div className="text-base font-bold" style={{ color: 'var(--text-secondary)' }}>
+              Best Ever! 🏆
             </div>
-            <div className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
-              {streakData.maxStreak > 0 ? '🏆 Personal best' : 'No record yet'}
+            <div className="mt-3 text-sm font-medium px-3 py-2 rounded-full"
+              style={{
+                background: streakData.maxStreak > 0 ? 'var(--gradient-warm)' : 'var(--bg-secondary)',
+                color: streakData.maxStreak > 0 ? 'white' : 'var(--text-muted)'
+              }}>
+              {streakData.maxStreak > 0 ? '⭐ Champion!' : '🎯 New goal!'}
             </div>
           </div>
         </div>
+
+        {/* Achievement badges */}
+        {streakData.currentStreak >= 7 && (
+          <div className="mt-6 p-4 rounded-2xl text-center slide-up"
+            style={{ background: 'var(--gradient-purple)' }}>
+            <div className="text-3xl mb-1">🌟</div>
+            <div className="text-white font-bold text-sm">
+              {streakData.currentStreak >= 30 ? 'SUPER CHAMPION! 30+ Days!' :
+               streakData.currentStreak >= 14 ? 'INCREDIBLE! 2 Weeks Strong!' :
+               'AWESOME! 1 Week Complete!'}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Today's Summary */}
       <div className="glass-card rounded-3xl p-6 slide-up stagger-1">
-        <h2 className="text-xl font-serif font-bold mb-5 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-          <span>📅</span> Today
+        <h2 className="text-2xl font-serif font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+          <span className="text-3xl">📅</span> Today&apos;s Adventures!
         </h2>
 
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="rounded-2xl p-5 text-center relative overflow-hidden"
-            style={{ background: 'var(--gradient-success)' }}>
-            <div className="text-3xl font-bold text-white mb-1">{todayWalks.length}</div>
-            <div className="text-sm text-white/90 font-medium">Walks</div>
-            <div className="absolute -bottom-4 -right-4 text-6xl opacity-20">🚶</div>
+          <div className="rounded-2xl p-6 text-center relative overflow-hidden wiggle"
+            style={{ background: 'var(--gradient-success)', boxShadow: '0 8px 20px rgba(0, 217, 163, 0.3)' }}>
+            <div className="text-5xl font-bold text-white mb-2">{todayWalks.length}</div>
+            <div className="text-base text-white font-bold">Walks! 🚶</div>
+            <div className="mt-2 text-xs text-white/80 font-medium">
+              {todayWalks.length === 0 ? 'Ready to go!' :
+               todayWalks.length === 1 ? 'Great start!' :
+               todayWalks.length === 2 ? 'Doing awesome!' : 'Super star! 🌟'}
+            </div>
+            <div className="absolute -bottom-4 -right-4 text-7xl opacity-20">🦴</div>
           </div>
-          <div className="rounded-2xl p-5 text-center relative overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-warm) 100%)' }}>
-            <div className="text-3xl font-bold text-white mb-1">{todayAccidents.length}</div>
-            <div className="text-sm text-white/90 font-medium">Accidents</div>
-            <div className="absolute -bottom-4 -right-4 text-6xl opacity-20">⚠️</div>
+          <div className="rounded-2xl p-6 text-center relative overflow-hidden"
+            style={{
+              background: todayAccidents.length === 0
+                ? 'linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%)'
+                : 'linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-warm) 100%)',
+              boxShadow: todayAccidents.length === 0
+                ? '0 8px 20px rgba(52, 152, 219, 0.3)'
+                : '0 8px 20px rgba(255, 167, 38, 0.3)'
+            }}>
+            <div className="text-5xl font-bold text-white mb-2">{todayAccidents.length}</div>
+            <div className="text-base text-white font-bold">Oopsies</div>
+            <div className="mt-2 text-xs text-white/80 font-medium">
+              {todayAccidents.length === 0 ? '🎉 Perfect day!' : 'Learning time! 📚'}
+            </div>
+            <div className="absolute -bottom-4 -right-4 text-7xl opacity-20">
+              {todayAccidents.length === 0 ? '🎯' : '⚠️'}
+            </div>
           </div>
         </div>
 
         {/* Recent Activity */}
         <div className="space-y-3">
-          <h3 className="font-semibold text-sm uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
-            Recent Activity
+          <h3 className="font-bold text-base flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <span className="text-xl">⚡</span> What We Did Today
           </h3>
           {todayLogs.slice(0, 5).map((log, idx) => (
-            <div key={log.id} className={`p-4 rounded-xl slide-up stagger-${idx + 2}`}
-              style={{ background: 'var(--bg-secondary)' }}>
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-                  {log.type === 'walk' ? '🚶 Walk' : `${log.subtype === 'pee' ? '💧' : '💩'} Accident`}
+            <div key={log.id} className={`p-4 rounded-2xl slide-up stagger-${idx + 2}`}
+              style={{
+                background: log.type === 'walk'
+                  ? 'linear-gradient(135deg, rgba(0, 217, 163, 0.15) 0%, rgba(0, 200, 150, 0.15) 100%)'
+                  : 'linear-gradient(135deg, rgba(255, 167, 38, 0.15) 0%, rgba(255, 107, 53, 0.15) 100%)',
+                border: '2px solid',
+                borderColor: log.type === 'walk' ? 'var(--accent-green)' : 'var(--accent-amber)'
+              }}>
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                  {log.type === 'walk' ? '🦴 Walk Time!' : `${log.subtype === 'pee' ? '💧' : '💩'} Oopsie`}
                 </span>
-                <span className="text-xs font-medium px-2 py-1 rounded-full"
-                  style={{ background: 'var(--bg-primary)', color: 'var(--text-muted)' }}>
+                <span className="text-xs font-bold px-3 py-1 rounded-full"
+                  style={{
+                    background: log.type === 'walk' ? 'var(--gradient-success)' : 'var(--gradient-warm)',
+                    color: 'white'
+                  }}>
                   {new Date(log.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                 </span>
               </div>
-              <div className="text-sm flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
-                <span>{log.person}</span>
-                {log.duration && <span>• {log.duration} min</span>}
+              <div className="text-sm flex items-center gap-2 font-medium" style={{ color: 'var(--text-secondary)' }}>
+                <span>👤 {log.person}</span>
+                {log.duration && <span>• ⏱️ {log.duration} min</span>}
               </div>
             </div>
           ))}
           {todayLogs.length === 0 && (
-            <div className="text-center py-8 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-              <div className="text-4xl mb-2 opacity-50">🌅</div>
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                No activity yet today<br />
-                <span className="text-xs">Start with a morning walk!</span>
+            <div className="text-center py-10 rounded-2xl" style={{
+              background: 'var(--gradient-sunrise)',
+              border: '3px dashed var(--accent-gold)'
+            }}>
+              <div className="text-6xl mb-3 hop">🌅</div>
+              <p className="text-lg font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+                Ready for an Adventure!
+              </p>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                Let&apos;s take Hope for a walk! 🐕
               </p>
             </div>
           )}
@@ -431,47 +493,49 @@ function LogTab({ onLog, setShowLogModal, showLogModal, darkMode }: {
   return (
     <div className="space-y-6 py-4">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-serif font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-          Quick Log
+        <h2 className="text-4xl font-serif font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+          What Happened? 📝
         </h2>
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          Track Hope&apos;s daily activities
+        <p className="text-base font-medium" style={{ color: 'var(--text-secondary)' }}>
+          Tell us about Hope&apos;s adventure!
         </p>
       </div>
 
       <button
         onClick={() => setShowLogModal('walk')}
-        className="btn-hope w-full p-8 rounded-3xl font-bold text-xl shadow-2xl relative overflow-hidden slide-up"
+        className="btn-hope w-full p-10 rounded-3xl font-bold text-2xl shadow-2xl relative overflow-hidden slide-up transform hover:scale-105 transition-transform"
         style={{
           background: 'var(--gradient-success)',
-          color: 'white'
+          color: 'white',
+          border: '4px solid rgba(255, 255, 255, 0.3)'
         }}
       >
-        <div className="absolute top-4 right-4 text-6xl opacity-20">🚶</div>
-        <div className="relative z-10 flex items-center justify-center gap-3">
-          <span className="text-3xl">🚶</span>
-          <span>Log Walk</span>
+        <div className="absolute top-2 right-2 text-8xl opacity-15">🦴</div>
+        <div className="relative z-10 flex items-center justify-center gap-4 mb-2">
+          <span className="text-5xl">🚶</span>
+          <span>Walk Time!</span>
         </div>
-        <div className="text-sm mt-2 opacity-90 font-normal">
-          Record a successful walk
+        <div className="text-base mt-3 opacity-95 font-semibold">
+          Hope went on a walk! 🎉
         </div>
       </button>
 
       <button
         onClick={() => setShowLogModal('accident')}
-        className="btn-hope w-full p-8 rounded-3xl font-bold text-xl shadow-2xl relative overflow-hidden slide-up stagger-1"
+        className="btn-hope w-full p-10 rounded-3xl font-bold text-2xl shadow-2xl relative overflow-hidden slide-up stagger-1 transform hover:scale-105 transition-transform"
         style={{
           background: 'linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-warm) 100%)',
-          color: 'white'
+          color: 'white',
+          border: '4px solid rgba(255, 255, 255, 0.3)'
         }}
       >
-        <div className="absolute top-4 right-4 text-6xl opacity-20">⚠️</div>
-        <div className="relative z-10 flex items-center justify-center gap-3">
-          <span className="text-3xl">⚠️</span>
-          <span>Log Accident</span>
+        <div className="absolute top-2 right-2 text-8xl opacity-15">💧</div>
+        <div className="relative z-10 flex items-center justify-center gap-4 mb-2">
+          <span className="text-5xl">⚠️</span>
+          <span>Oopsie!</span>
         </div>
-        <div className="text-sm mt-2 opacity-90 font-normal">
-          Track an accident to improve
+        <div className="text-base mt-3 opacity-95 font-semibold">
+          Little accident - that&apos;s okay! 💪
         </div>
       </button>
 
@@ -513,34 +577,40 @@ function LogModal({ type, onClose, onSubmit, darkMode }: {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4 z-50"
-      style={{ background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(8px)' }}
+      style={{ background: 'rgba(0, 0, 0, 0.7)', backdropFilter: 'blur(12px)' }}
       onClick={onClose}>
       <div className="glass-card rounded-3xl p-8 w-full max-w-sm slide-up"
+        style={{
+          border: '3px solid',
+          borderColor: type === 'walk' ? 'var(--accent-green)' : 'var(--accent-amber)'
+        }}
         onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-2xl font-serif font-bold mb-6 flex items-center gap-2"
+        <h3 className="text-3xl font-serif font-bold mb-6 flex items-center gap-3 hop"
           style={{ color: 'var(--text-primary)' }}>
-          {type === 'walk' ? '🚶 Log Walk' : '⚠️ Log Accident'}
+          {type === 'walk' ? '🦴 Walk Time!' : '⚠️ Oopsie Happened'}
         </h3>
 
         {type === 'accident' && (
           <div className="mb-6">
-            <label className="block text-sm font-semibold mb-3 uppercase tracking-wide"
-              style={{ color: 'var(--text-muted)' }}>
-              Type
+            <label className="block text-base font-bold mb-4"
+              style={{ color: 'var(--text-primary)' }}>
+              What kind of oopsie? 🤔
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               {(['pee', 'poop'] as const).map(s => (
                 <button
                   key={s}
                   onClick={() => setSubtype(s)}
-                  className="btn-hope p-4 rounded-2xl font-semibold text-lg transition-all"
+                  className="btn-hope p-6 rounded-2xl font-bold text-xl transition-all transform hover:scale-105"
                   style={subtype === s ? {
                     background: 'linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-warm) 100%)',
                     color: 'white',
-                    boxShadow: '0 4px 16px var(--shadow-soft)'
+                    boxShadow: '0 6px 20px var(--shadow-soft)',
+                    border: '3px solid rgba(255, 255, 255, 0.4)'
                   } : {
                     background: 'var(--bg-secondary)',
-                    color: 'var(--text-secondary)'
+                    color: 'var(--text-secondary)',
+                    border: '2px solid var(--bg-secondary)'
                   }}
                 >
                   {s === 'pee' ? '💧 Pee' : '💩 Poop'}
@@ -552,46 +622,51 @@ function LogModal({ type, onClose, onSubmit, darkMode }: {
 
         {type === 'walk' && (
           <div className="mb-6">
-            <label className="block text-sm font-semibold mb-3 uppercase tracking-wide"
-              style={{ color: 'var(--text-muted)' }}>
-              Duration (optional)
+            <label className="block text-base font-bold mb-4"
+              style={{ color: 'var(--text-primary)' }}>
+              How long was the walk? ⏱️
             </label>
             <input
               type="number"
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
-              placeholder="e.g., 15 minutes"
-              className="w-full p-4 rounded-2xl border-2 font-medium transition-all focus:outline-none focus:ring-2"
+              placeholder="Minutes (like 15)"
+              className="w-full p-5 rounded-2xl border-3 font-bold text-lg transition-all focus:outline-none focus:ring-4"
               style={{
                 background: 'var(--bg-secondary)',
-                borderColor: 'transparent',
+                borderColor: 'var(--accent-green)',
                 color: 'var(--text-primary)',
-                '--tw-ring-color': 'var(--accent-warm)'
+                '--tw-ring-color': 'var(--accent-green)'
               } as React.CSSProperties}
             />
+            <p className="text-sm mt-2 font-medium" style={{ color: 'var(--text-muted)' }}>
+              💡 You can skip this if you want!
+            </p>
           </div>
         )}
 
-        <div className="flex gap-3 mt-8">
+        <div className="flex gap-4 mt-8">
           <button
             onClick={onClose}
-            className="flex-1 py-4 rounded-2xl font-semibold transition-all"
+            className="flex-1 py-5 rounded-2xl font-bold text-lg transition-all transform hover:scale-105"
             style={{
               background: 'var(--bg-secondary)',
-              color: 'var(--text-secondary)'
+              color: 'var(--text-secondary)',
+              border: '2px solid var(--text-muted)'
             }}
           >
-            Cancel
+            Nevermind
           </button>
           <button
             onClick={handleSubmit}
-            className="btn-hope flex-1 py-4 rounded-2xl font-semibold shadow-lg"
+            className="btn-hope flex-1 py-5 rounded-2xl font-bold text-lg shadow-xl transform hover:scale-105"
             style={{
-              background: 'var(--gradient-success)',
-              color: 'white'
+              background: type === 'walk' ? 'var(--gradient-success)' : 'var(--gradient-warm)',
+              color: 'white',
+              border: '3px solid rgba(255, 255, 255, 0.4)'
             }}
           >
-            Save Log
+            ✅ Save It!
           </button>
         </div>
       </div>
@@ -657,41 +732,45 @@ function TrendsTab({ logs, darkMode }: { logs: HopeLog[], darkMode: boolean }) {
   return (
     <div className="space-y-5 py-2">
       {/* View Toggle */}
-      <div className="glass-card rounded-2xl p-2 flex gap-2">
+      <div className="glass-card rounded-2xl p-2 flex gap-3">
         <button
           onClick={() => setView('daily')}
-          className="btn-hope flex-1 py-3 rounded-xl font-semibold text-sm transition-all"
+          className="btn-hope flex-1 py-4 rounded-xl font-bold text-base transition-all transform hover:scale-105"
           style={view === 'daily' ? {
             background: 'var(--gradient-warm)',
             color: 'white',
-            boxShadow: '0 2px 12px var(--shadow-soft)'
+            boxShadow: '0 4px 16px var(--shadow-soft)',
+            border: '2px solid rgba(255, 255, 255, 0.4)'
           } : {
-            background: 'transparent',
-            color: 'var(--text-muted)'
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-muted)',
+            border: '2px solid transparent'
           }}
         >
-          📊 Daily
+          📊 Chart
         </button>
         <button
           onClick={() => setView('heatmap')}
-          className="btn-hope flex-1 py-3 rounded-xl font-semibold text-sm transition-all"
+          className="btn-hope flex-1 py-4 rounded-xl font-bold text-base transition-all transform hover:scale-105"
           style={view === 'heatmap' ? {
             background: 'var(--gradient-warm)',
             color: 'white',
-            boxShadow: '0 2px 12px var(--shadow-soft)'
+            boxShadow: '0 4px 16px var(--shadow-soft)',
+            border: '2px solid rgba(255, 255, 255, 0.4)'
           } : {
-            background: 'transparent',
-            color: 'var(--text-muted)'
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-muted)',
+            border: '2px solid transparent'
           }}
         >
-          🗓️ Heatmap
+          🗓️ Calendar
         </button>
       </div>
 
       {view === 'daily' && (
         <div className="glass-card rounded-3xl p-6 slide-up">
-          <h3 className="font-serif font-bold text-xl mb-5" style={{ color: 'var(--text-primary)' }}>
-            Last 7 Days
+          <h3 className="font-serif font-bold text-2xl mb-6 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <span className="text-3xl">📈</span> This Week&apos;s Stats!
           </h3>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={dailyData}>
@@ -725,49 +804,50 @@ function TrendsTab({ logs, darkMode }: { logs: HopeLog[], darkMode: boolean }) {
 
       {view === 'heatmap' && (
         <div className="glass-card rounded-3xl p-6 slide-up">
-          <h3 className="font-serif font-bold text-xl mb-5" style={{ color: 'var(--text-primary)' }}>
-            7-Day Activity Map
+          <h3 className="font-serif font-bold text-2xl mb-6 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <span className="text-3xl">🗓️</span> Week at a Glance!
           </h3>
           <div className="space-y-3 mb-6">
             {heatmapData.map((day, i) => (
               <div key={i} className={`flex items-center gap-3 slide-up stagger-${i + 1}`}>
-                <div className="text-xs font-semibold w-20" style={{ color: 'var(--text-secondary)' }}>
+                <div className="text-sm font-bold w-24" style={{ color: 'var(--text-primary)' }}>
                   {day.day}
                 </div>
                 <div
-                  className="flex-1 h-14 rounded-2xl flex items-center justify-center font-bold text-sm shadow-lg transition-all hover:scale-105"
+                  className="flex-1 h-16 rounded-2xl flex items-center justify-center font-bold text-base shadow-lg transition-all transform hover:scale-105"
                   style={{
                     background: day.gradient || day.color,
-                    color: day.gradient ? 'white' : 'var(--text-muted)'
+                    color: day.gradient ? 'white' : 'var(--text-muted)',
+                    border: day.gradient ? '3px solid rgba(255, 255, 255, 0.3)' : '2px dashed var(--text-muted)'
                   }}
                 >
-                  {day.walks > 0 && <span>🚶 {day.walks}</span>}
+                  {day.walks > 0 && <span className="text-lg">🦴 {day.walks}</span>}
                   {day.walks > 0 && day.accidents > 0 && <span className="mx-2">•</span>}
-                  {day.accidents > 0 && <span>⚠️ {day.accidents}</span>}
-                  {day.walks === 0 && day.accidents === 0 && <span>—</span>}
+                  {day.accidents > 0 && <span className="text-lg">⚠️ {day.accidents}</span>}
+                  {day.walks === 0 && day.accidents === 0 && <span className="text-2xl">💤</span>}
                 </div>
               </div>
             ))}
           </div>
 
           {/* Legend */}
-          <div className="flex gap-4 text-xs justify-center flex-wrap pt-4 border-t"
-            style={{ borderColor: 'var(--bg-secondary)' }}>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-lg shadow-sm" style={{ background: 'var(--gradient-success)' }}></div>
-              <span style={{ color: 'var(--text-secondary)' }}>Walks only</span>
+          <div className="flex gap-3 text-sm justify-center flex-wrap pt-5 border-t-2"
+            style={{ borderColor: 'var(--accent-gold)' }}>
+            <div className="flex items-center gap-2 font-bold">
+              <div className="w-6 h-6 rounded-lg shadow-md" style={{ background: 'var(--gradient-success)' }}></div>
+              <span style={{ color: 'var(--text-primary)' }}>🦴 Walks</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-lg shadow-sm" style={{
+            <div className="flex items-center gap-2 font-bold">
+              <div className="w-6 h-6 rounded-lg shadow-md" style={{
                 background: 'linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-warm) 100%)'
               }}></div>
-              <span style={{ color: 'var(--text-secondary)' }}>Mixed</span>
+              <span style={{ color: 'var(--text-primary)' }}>📝 Both</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-lg shadow-sm" style={{
+            <div className="flex items-center gap-2 font-bold">
+              <div className="w-6 h-6 rounded-lg shadow-md" style={{
                 background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
               }}></div>
-              <span style={{ color: 'var(--text-secondary)' }}>Accidents only</span>
+              <span style={{ color: 'var(--text-primary)' }}>⚠️ Oopsies</span>
             </div>
           </div>
         </div>
