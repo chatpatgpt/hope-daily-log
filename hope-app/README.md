@@ -99,3 +99,4 @@ hope-app/
 ## Support
 
 For issues or questions, check the [Next.js docs](https://nextjs.org/docs) or [Supabase docs](https://supabase.com/docs).
+# Deployed to Vercel
