@@ -158,6 +158,9 @@ export default function Home() {
     condition: string;
     icon: string;
     feelsLike: number;
+    upcomingCondition?: string;
+    upcomingTime?: string;
+    recommendation?: string;
   } | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [locationError, setLocationError] = useState(false);
@@ -190,8 +193,9 @@ export default function Home() {
 
       const pointsData = await pointsResponse.json();
       const observationStationsUrl = pointsData.properties.observationStations;
+      const forecastHourlyUrl = pointsData.properties.forecastHourly;
 
-      // Step 2: Get nearest observation station
+      // Step 2: Get nearest observation station for current conditions
       const stationsResponse = await fetch(observationStationsUrl);
       if (!stationsResponse.ok) {
         throw new Error(`Stations fetch failed: ${stationsResponse.status}`);
@@ -223,11 +227,78 @@ export default function Home() {
         throw new Error('Temperature data unavailable');
       }
 
+      // Step 4: Get hourly forecast for next 3 hours
+      const forecastResponse = await fetch(forecastHourlyUrl);
+      let upcomingCondition = '';
+      let upcomingTime = '';
+      let recommendation = '';
+
+      if (forecastResponse.ok) {
+        const forecastData = await forecastResponse.json();
+        const periods = forecastData.properties.periods.slice(0, 3); // Next 3 hours
+
+        // Look for significant weather changes
+        const hasRain = periods.some((p: any) =>
+          p.shortForecast.toLowerCase().includes('rain') ||
+          p.shortForecast.toLowerCase().includes('shower') ||
+          p.shortForecast.toLowerCase().includes('storm')
+        );
+
+        const hasSnow = periods.some((p: any) =>
+          p.shortForecast.toLowerCase().includes('snow')
+        );
+
+        if (hasRain) {
+          const rainPeriod = periods.find((p: any) =>
+            p.shortForecast.toLowerCase().includes('rain') ||
+            p.shortForecast.toLowerCase().includes('shower')
+          );
+          if (rainPeriod) {
+            const rainTime = new Date(rainPeriod.startTime);
+            const now = new Date();
+            const hoursUntil = Math.round((rainTime.getTime() - now.getTime()) / (1000 * 60 * 60));
+
+            if (hoursUntil <= 0) {
+              upcomingCondition = 'Rain now';
+              recommendation = 'Quick walk recommended';
+            } else if (hoursUntil === 1) {
+              upcomingCondition = 'Rain in 1 hour';
+              recommendation = 'Walk soon!';
+            } else {
+              upcomingCondition = `Rain in ${hoursUntil} hours`;
+              recommendation = 'Good time to walk';
+            }
+            upcomingTime = rainTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+          }
+        } else if (hasSnow) {
+          upcomingCondition = 'Snow expected';
+          recommendation = 'Bundle up!';
+        } else {
+          // Check temperature trend
+          const lastPeriod = periods[periods.length - 1];
+          const tempChange = lastPeriod.temperature - tempF;
+
+          if (tempChange > 10) {
+            upcomingCondition = `Warming to ${lastPeriod.temperature}°F`;
+            recommendation = 'Walk now while cooler';
+          } else if (tempChange < -10) {
+            upcomingCondition = `Cooling to ${lastPeriod.temperature}°F`;
+            recommendation = 'Walk now while warmer';
+          } else {
+            upcomingCondition = 'Clear for 3 hours';
+            recommendation = 'Great time to walk!';
+          }
+        }
+      }
+
       setWeather({
         temp: tempF,
         condition: condition,
-        icon: '', // Weather.gov doesn't provide icons
-        feelsLike: feelsLikeF || tempF
+        icon: '',
+        feelsLike: feelsLikeF || tempF,
+        upcomingCondition,
+        upcomingTime,
+        recommendation
       });
       setLocationError(false);
     } catch (err) {
@@ -395,8 +466,18 @@ export default function Home() {
           <div className="weather-compact">
             <span>{getWeatherRecommendation(weather.temp, weather.condition).emoji}</span>
             <span>{weather.temp}°F</span>
-            <span className="weather-dot">•</span>
-            <span>{getWeatherRecommendation(weather.temp, weather.condition).text}</span>
+            {weather.upcomingCondition && (
+              <>
+                <span className="weather-dot">•</span>
+                <span>{weather.upcomingCondition}</span>
+              </>
+            )}
+            {weather.recommendation && (
+              <>
+                <span className="weather-dot">•</span>
+                <span style={{ fontWeight: 600 }}>{weather.recommendation}</span>
+              </>
+            )}
           </div>
         )}
 
