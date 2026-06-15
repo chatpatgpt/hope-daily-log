@@ -161,8 +161,6 @@ export default function Home() {
   } | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [locationError, setLocationError] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string[]>([]);
-  const [showDebug, setShowDebug] = useState(true);
 
   useEffect(() => {
     if (!weather && !weatherLoading && !locationError) {
@@ -171,16 +169,8 @@ export default function Home() {
   }, [weather, weatherLoading, locationError]);
 
   async function fetchWeather() {
-    const debug: string[] = [];
-    debug.push('🌤️ Starting weather fetch (Weather.gov)...');
-    debug.push(`Has walked today? ${hasWalkedToday}`);
-    setDebugInfo([...debug]);
-
     setWeatherLoading(true);
     try {
-      debug.push('📍 Requesting location...');
-      setDebugInfo([...debug]);
-
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           timeout: 10000,
@@ -189,17 +179,10 @@ export default function Home() {
       });
 
       const { latitude, longitude } = position.coords;
-      debug.push(`📍 Location: ${latitude.toFixed(2)}, ${longitude.toFixed(2)}`);
-      setDebugInfo([...debug]);
 
       // Step 1: Get weather station metadata from Weather.gov
-      debug.push('🌐 Fetching weather station...');
-      setDebugInfo([...debug]);
-
       const pointsUrl = `https://api.weather.gov/points/${latitude.toFixed(4)},${longitude.toFixed(4)}`;
       const pointsResponse = await fetch(pointsUrl);
-      debug.push(`📥 Points response: ${pointsResponse.status}`);
-      setDebugInfo([...debug]);
 
       if (!pointsResponse.ok) {
         throw new Error(`Weather.gov points failed: ${pointsResponse.status}`);
@@ -209,9 +192,6 @@ export default function Home() {
       const observationStationsUrl = pointsData.properties.observationStations;
 
       // Step 2: Get nearest observation station
-      debug.push('🌐 Finding nearest station...');
-      setDebugInfo([...debug]);
-
       const stationsResponse = await fetch(observationStationsUrl);
       if (!stationsResponse.ok) {
         throw new Error(`Stations fetch failed: ${stationsResponse.status}`);
@@ -221,13 +201,8 @@ export default function Home() {
       const nearestStation = stationsData.features[0].id;
 
       // Step 3: Get current observations
-      debug.push('🌐 Getting current weather...');
-      setDebugInfo([...debug]);
-
       const observationUrl = `${nearestStation}/observations/latest`;
       const obsResponse = await fetch(observationUrl);
-      debug.push(`📥 Weather response: ${obsResponse.status}`);
-      setDebugInfo([...debug]);
 
       if (!obsResponse.ok) {
         throw new Error(`Observation fetch failed: ${obsResponse.status}`);
@@ -244,9 +219,6 @@ export default function Home() {
 
       const condition = props.textDescription || 'Clear';
 
-      debug.push(`✅ Got weather: ${tempF}°F, ${condition}`);
-      setDebugInfo([...debug]);
-
       if (tempF === null) {
         throw new Error('Temperature data unavailable');
       }
@@ -258,11 +230,8 @@ export default function Home() {
         feelsLike: feelsLikeF || tempF
       });
       setLocationError(false);
-      debug.push('✅ Weather displayed!');
-      setDebugInfo([...debug]);
     } catch (err) {
-      debug.push(`❌ Error: ${err instanceof Error ? err.message : String(err)}`);
-      setDebugInfo([...debug]);
+      console.error('Weather error:', err);
       setLocationError(true);
     } finally {
       setWeatherLoading(false);
@@ -414,53 +383,6 @@ export default function Home() {
           <span>{walkStreak} day{walkStreak !== 1 ? 's' : ''} walking streak</span>
         </div>
       </div>
-
-      {/* Debug Panel - Persistent */}
-      {debugInfo.length > 0 && showDebug && (
-        <div style={{
-          margin: '0 auto 1rem',
-          maxWidth: '600px',
-          padding: '1rem',
-          background: '#fff3cd',
-          border: '2px solid #856404',
-          borderRadius: '8px',
-          fontSize: '0.875rem',
-          fontFamily: 'monospace',
-          position: 'relative'
-        }}>
-          <button
-            onClick={() => setShowDebug(false)}
-            style={{
-              position: 'absolute',
-              top: '0.5rem',
-              right: '0.5rem',
-              background: '#856404',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              padding: '0.25rem 0.5rem',
-              cursor: 'pointer',
-              fontSize: '0.75rem',
-              fontWeight: 'bold'
-            }}
-          >
-            ✕
-          </button>
-          <strong style={{ display: 'block', marginBottom: '0.5rem', fontSize: '1rem' }}>
-            Weather Debug:
-          </strong>
-          {debugInfo.map((info, i) => (
-            <div key={i} style={{
-              marginTop: '0.5rem',
-              padding: '0.25rem',
-              background: i === debugInfo.length - 1 ? '#fffaeb' : 'transparent',
-              fontWeight: i === debugInfo.length - 1 ? 'bold' : 'normal'
-            }}>
-              {info}
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* Weather Banner - always visible */}
       <>
