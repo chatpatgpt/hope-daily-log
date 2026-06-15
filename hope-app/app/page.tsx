@@ -161,6 +161,7 @@ export default function Home() {
   } | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [locationError, setLocationError] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
 
   useEffect(() => {
     if (!hasWalkedToday && !weather && !weatherLoading && !locationError) {
@@ -169,12 +170,17 @@ export default function Home() {
   }, [hasWalkedToday, weather, weatherLoading, locationError]);
 
   async function fetchWeather() {
-    console.log('🌤️ Fetching weather...');
-    console.log('Has walked today?', hasWalkedToday);
-    console.log('API Key exists?', !!process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY);
+    const debug: string[] = [];
+    debug.push('🌤️ Starting weather fetch...');
+    debug.push(`Has walked today? ${hasWalkedToday}`);
+    debug.push(`API Key exists? ${!!process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}`);
+    setDebugInfo([...debug]);
 
     setWeatherLoading(true);
     try {
+      debug.push('📍 Requesting location...');
+      setDebugInfo([...debug]);
+
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           timeout: 10000,
@@ -183,23 +189,28 @@ export default function Home() {
       });
 
       const { latitude, longitude } = position.coords;
-      console.log('📍 Location:', latitude, longitude);
+      debug.push(`📍 Location: ${latitude.toFixed(2)}, ${longitude.toFixed(2)}`);
+      setDebugInfo([...debug]);
 
       const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || 'demo';
       const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=imperial&appid=${apiKey}`;
-      console.log('🌐 Fetching from:', url.replace(apiKey, 'API_KEY'));
+      debug.push('🌐 Fetching weather data...');
+      setDebugInfo([...debug]);
 
       const response = await fetch(url);
-      console.log('📥 Response status:', response.status);
+      debug.push(`📥 Response: ${response.status}`);
+      setDebugInfo([...debug]);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ API Error:', errorText);
+        debug.push(`❌ API Error: ${errorText.substring(0, 100)}`);
+        setDebugInfo([...debug]);
         throw new Error(`Weather fetch failed: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('✅ Weather data:', data);
+      debug.push(`✅ Got weather: ${data.main.temp}°F, ${data.weather[0].main}`);
+      setDebugInfo([...debug]);
 
       setWeather({
         temp: Math.round(data.main.temp),
@@ -208,9 +219,11 @@ export default function Home() {
         feelsLike: Math.round(data.main.feels_like)
       });
       setLocationError(false);
-      console.log('✅ Weather set successfully');
+      debug.push('✅ Weather displayed!');
+      setDebugInfo([...debug]);
     } catch (err) {
-      console.error('❌ Weather error:', err);
+      debug.push(`❌ Error: ${err instanceof Error ? err.message : String(err)}`);
+      setDebugInfo([...debug]);
       setLocationError(true);
     } finally {
       setWeatherLoading(false);
@@ -362,6 +375,25 @@ export default function Home() {
           <span>{walkStreak} day{walkStreak !== 1 ? 's' : ''} walking streak</span>
         </div>
       </div>
+
+      {/* Debug Panel */}
+      {debugInfo.length > 0 && (
+        <div style={{
+          margin: '0 auto 1rem',
+          maxWidth: '600px',
+          padding: '1rem',
+          background: '#f0f0f0',
+          border: '2px solid #333',
+          borderRadius: '8px',
+          fontSize: '0.75rem',
+          fontFamily: 'monospace'
+        }}>
+          <strong>Debug Info:</strong>
+          {debugInfo.map((info, i) => (
+            <div key={i} style={{ marginTop: '0.25rem' }}>{info}</div>
+          ))}
+        </div>
+      )}
 
       {/* Weather Banner - only show if no walk today */}
       {!hasWalkedToday && (
