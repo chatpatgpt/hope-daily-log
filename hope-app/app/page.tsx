@@ -56,6 +56,11 @@ export default function Home() {
     if (error) alert('Could not sign in: ' + error.message);
   }
 
+  async function signInAnonymously() {
+    const { error } = await supabase.auth.signInAnonymously();
+    if (error) alert('Could not continue as guest: ' + error.message);
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
     setLogs([]);
@@ -214,6 +219,9 @@ export default function Home() {
           </p>
           <button onClick={signInWithGoogle} className="btn btn-primary" style={{ width: '100%' }}>
             Sign in with Google
+          </button>
+          <button onClick={signInAnonymously} className="btn btn-secondary" style={{ width: '100%', marginTop: '0.75rem' }}>
+            Continue as Guest
           </button>
           <button
             onClick={() => setDarkMode(!darkMode)}
