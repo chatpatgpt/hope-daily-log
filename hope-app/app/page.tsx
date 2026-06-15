@@ -74,47 +74,41 @@ export default function Home() {
   function handleDayClick(date: Date) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const clickedDate = new Date(date);
-    clickedDate.setHours(0, 0, 0, 0);
-
-    if (clickedDate.getTime() === today.getTime()) {
+    const clicked = new Date(date);
+    clicked.setHours(0, 0, 0, 0);
+    if (clicked <= today) {
       setSelectedDay(date);
       setShowModal(true);
     }
   }
 
-  async function saveDayLog(pooped: boolean, peed: boolean) {
+  async function saveWalkLog(pooped: boolean, peed: boolean) {
     if (!user || !selectedDay) return;
-
-    const dayStr = selectedDay.toDateString();
-    const existingLog = logs.find(l =>
-      l.type === 'walk' && new Date(l.created_at).toDateString() === dayStr
-    );
-
     try {
-      if (existingLog) {
-        const { error } = await supabase
-          .from('hope_logs')
-          .update({ pooped, peed })
-          .eq('id', existingLog.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from('hope_logs').insert([{
-          type: 'walk',
-          pooped,
-          peed,
-          user_id: user.id,
-          person: 'Hope',
-          created_at: selectedDay.toISOString()
-        }]);
-        if (error) throw error;
-      }
-
+      const { error } = await supabase.from('hope_logs').insert([{
+        type: 'walk',
+        pooped,
+        peed,
+        user_id: user.id,
+        person: 'Hope',
+        created_at: new Date().toISOString()
+      }]);
+      if (error) throw error;
       await fetchLogs();
-      setShowModal(false);
     } catch (err) {
       console.error('Save error:', err);
       alert('Could not save: ' + (err as Error).message);
+    }
+  }
+
+  async function deleteLog(id: string) {
+    try {
+      const { error } = await supabase.from('hope_logs').delete().eq('id', id);
+      if (error) throw error;
+      await fetchLogs();
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Could not delete: ' + (err as Error).message);
     }
   }
 
@@ -231,7 +225,8 @@ export default function Home() {
           date={selectedDay}
           logs={logs}
           onClose={() => setShowModal(false)}
-          onSave={saveDayLog}
+          onSave={saveWalkLog}
+          onDelete={deleteLog}
         />
       )}
     </div>
@@ -263,7 +258,7 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
 
   function getDayStatus(date: Date) {
     const dateStr = date.toDateString();
-    const dayLog = logs.find(l =>
+    const dayLogs = logs.filter(l =>
       l.type === 'walk' && new Date(l.created_at).toDateString() === dateStr
     );
 
@@ -274,11 +269,13 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
     const isFuture = checkDate > today;
 
     return {
-      dayLog,
+      dayLogs,
+      poopCount: dayLogs.filter(l => l.pooped).length,
+      peeCount: dayLogs.filter(l => l.peed).length,
       isPast,
       isToday,
       isFuture,
-      isMissed: isPast && !dayLog
+      isMissed: isPast && dayLogs.length === 0
     };
   }
 
@@ -292,7 +289,6 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
 
   return (
     <div className="card">
-      {/* Month Header */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -310,7 +306,6 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
         </button>
       </div>
 
-      {/* Weekday Headers */}
       <div className="calendar-grid" style={{ marginBottom: '0.5rem' }}>
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
           <div key={day} style={{
@@ -328,7 +323,6 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
         ))}
       </div>
 
-      {/* Calendar Grid */}
       <div className="calendar-grid">
         {days.map(date => {
           const status = getDayStatus(date);
@@ -346,13 +340,17 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
               <div className="day-indicators">
                 {!isOtherMonth && !status.isFuture && (
                   <>
-                    {status.dayLog && (
-                      <>
-                        {status.dayLog.pooped && <span>💩</span>}
-                        {status.dayLog.peed && <span>💧</span>}
-                      </>
+                    {status.poopCount > 0 && (
+                      <span className="day-count">
+                        💩{status.poopCount > 1 && <sup>{status.poopCount}</sup>}
+                      </span>
                     )}
-                    {status.isMissed && <span style={{ color: 'var(--error)', fontSize: '1.25rem' }}>✕</span>}
+                    {status.peeCount > 0 && (
+                      <span className="day-count">
+                        💧{status.peeCount > 1 && <sup>{status.peeCount}</sup>}
+                      </span>
+                    )}
+                    {status.isMissed && <span style={{ color: 'var(--error)', fontSize: '0.875rem' }}>✕</span>}
                   </>
                 )}
               </div>
@@ -361,7 +359,6 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
         })}
       </div>
 
-      {/* Legend */}
       <div style={{
         marginTop: '1.5rem',
         paddingTop: '1.5rem',
@@ -386,57 +383,129 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
   );
 }
 
-function DayModal({ date, logs, onClose, onSave }: {
+function DayModal({ date, logs, onClose, onSave, onDelete }: {
   date: Date,
   logs: HopeLog[],
   onClose: () => void,
-  onSave: (pooped: boolean, peed: boolean) => void
+  onSave: (pooped: boolean, peed: boolean) => void,
+  onDelete: (id: string) => void
 }) {
-  const dateStr = date.toDateString();
-  const existingLog = logs.find(l =>
-    l.type === 'walk' && new Date(l.created_at).toDateString() === dateStr
-  );
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const clicked = new Date(date);
+  clicked.setHours(0, 0, 0, 0);
+  const isToday = clicked.getTime() === today.getTime();
 
-  const [pooped, setPooped] = useState(existingLog?.pooped ?? false);
-  const [peed, setPeed] = useState(existingLog?.peed ?? false);
+  const dateStr = date.toDateString();
+  const dayLogs = logs
+    .filter(l => l.type === 'walk' && new Date(l.created_at).toDateString() === dateStr)
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+  const [pooped, setPooped] = useState(false);
+  const [peed, setPeed] = useState(false);
+
+  function handleSave() {
+    onSave(pooped, peed);
+    setPooped(false);
+    setPeed(false);
+  }
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h3 style={{
-          fontSize: '1.25rem',
-          fontWeight: 600,
-          marginBottom: '1.5rem',
-          color: 'var(--ink)'
-        }}>
-          {date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.25rem', color: 'var(--ink)' }}>
+          {date.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric' })}
         </h3>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          <button
-            onClick={() => setPooped(!pooped)}
-            className={`toggle-btn ${pooped ? 'active' : ''}`}
-          >
-            <span>💩 Pooped outside</span>
-            <span style={{ fontSize: '1.25rem' }}>{pooped ? '✓' : '○'}</span>
-          </button>
-          <button
-            onClick={() => setPeed(!peed)}
-            className={`toggle-btn ${peed ? 'active' : ''}`}
-          >
-            <span>💧 Peed outside</span>
-            <span style={{ fontSize: '1.25rem' }}>{peed ? '✓' : '○'}</span>
-          </button>
-        </div>
+        {/* Existing walk logs */}
+        {dayLogs.length > 0 && (
+          <div style={{ marginBottom: '1.25rem' }}>
+            <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {dayLogs.length} walk{dayLogs.length !== 1 ? 's' : ''} logged
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {dayLogs.map((log, i) => (
+                <div key={log.id} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.625rem 0.75rem',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 600 }}>
+                      Walk {i + 1}
+                    </span>
+                    <span style={{ fontSize: '1rem' }}>
+                      {log.pooped ? '💩' : ''}{log.peed ? '💧' : ''}
+                      {!log.pooped && !log.peed && <span style={{ color: 'var(--muted)', fontSize: '0.75rem' }}>no output</span>}
+                    </span>
+                  </div>
+                  {isToday && (
+                    <button
+                      onClick={() => onDelete(log.id)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'var(--error)',
+                        fontSize: '1rem',
+                        padding: '0.25rem',
+                        lineHeight: 1,
+                        touchAction: 'manipulation'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-          <button onClick={onClose} className="btn btn-secondary">
-            Cancel
+        {dayLogs.length === 0 && !isToday && (
+          <p style={{ color: 'var(--muted)', fontSize: '0.875rem', marginBottom: '1.25rem' }}>
+            No walks logged this day.
+          </p>
+        )}
+
+        {/* Log new walk — today only */}
+        {isToday && (
+          <>
+            <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Log a walk
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
+              <button
+                onClick={() => setPooped(!pooped)}
+                className={`toggle-btn ${pooped ? 'active' : ''}`}
+              >
+                <span>💩 Pooped outside</span>
+                <span style={{ fontSize: '1.25rem' }}>{pooped ? '✓' : '○'}</span>
+              </button>
+              <button
+                onClick={() => setPeed(!peed)}
+                className={`toggle-btn ${peed ? 'active' : ''}`}
+              >
+                <span>💧 Peed outside</span>
+                <span style={{ fontSize: '1.25rem' }}>{peed ? '✓' : '○'}</span>
+              </button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <button onClick={onClose} className="btn btn-secondary">Cancel</button>
+              <button onClick={handleSave} className="btn btn-primary">Log Walk</button>
+            </div>
+          </>
+        )}
+
+        {!isToday && (
+          <button onClick={onClose} className="btn btn-secondary" style={{ width: '100%' }}>
+            Close
           </button>
-          <button onClick={() => onSave(pooped, peed)} className="btn btn-primary">
-            Save
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );

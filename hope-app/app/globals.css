@@ -105,12 +105,25 @@ body {
 
 .day-indicators {
   display: flex;
-  gap: 0.25rem;
-  font-size: 1rem;
+  gap: 0.125rem;
   line-height: 1;
   align-items: center;
   justify-content: center;
   min-height: 20px;
+  flex-wrap: wrap;
+}
+
+.day-count {
+  font-size: 0.85rem;
+  line-height: 1;
+  position: relative;
+}
+
+.day-count sup {
+  font-size: 0.55rem;
+  font-weight: 700;
+  vertical-align: super;
+  color: var(--ink);
 }
 
 /* Buttons */
