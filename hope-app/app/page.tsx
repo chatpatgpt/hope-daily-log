@@ -12,7 +12,6 @@ export default function Home() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';
@@ -26,7 +25,7 @@ export default function Home() {
   }, [darkMode]);
 
   useEffect(() => {
-    checkUser();
+    initUser();
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
@@ -41,30 +40,16 @@ export default function Home() {
     }
   }, [user]);
 
-  async function checkUser() {
+  async function initUser() {
     const { data: { session } } = await supabase.auth.getSession();
-    setUser(session?.user ?? null);
-    setLoading(false);
-  }
-
-  async function signInWithGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/` : undefined
-      }
-    });
-    if (error) alert('Could not sign in: ' + error.message);
-  }
-
-  async function signInAnonymously() {
-    const { error } = await supabase.auth.signInAnonymously();
-    if (error) alert('Could not continue as guest: ' + error.message);
-  }
-
-  async function signOut() {
-    await supabase.auth.signOut();
-    setLogs([]);
+    if (session?.user) {
+      setUser(session.user);
+      setLoading(false);
+    } else {
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (!error) setUser(data.user);
+      setLoading(false);
+    }
   }
 
   async function fetchLogs() {
@@ -108,29 +93,23 @@ export default function Home() {
 
     try {
       if (existingLog) {
-        // Update existing walk
         const { error } = await supabase
           .from('hope_logs')
           .update({ pooped, peed })
           .eq('id', existingLog.id);
-
         if (error) throw error;
       } else {
-        // Create new walk
         const { error } = await supabase.from('hope_logs').insert([{
           type: 'walk',
           pooped,
           peed,
           user_id: user.id,
-          user_email: user.email,
-          person: user.user_metadata.full_name || user.email?.split('@')[0] || 'User',
+          person: 'Hope',
           created_at: selectedDay.toISOString()
         }]);
-
         if (error) throw error;
       }
 
-      // Refresh logs immediately
       await fetchLogs();
       setShowModal(false);
     } catch (err) {
@@ -183,59 +162,6 @@ export default function Home() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className={darkMode ? 'dark' : ''} style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem'
-      }}>
-        <div className="card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-          <div style={{
-            width: '6rem',
-            height: '6rem',
-            borderRadius: '50%',
-            border: '3px solid var(--primary)',
-            overflow: 'hidden',
-            margin: '0 auto 1.5rem'
-          }}>
-            <img src="/hope.jpg" alt="Hope" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <h1 style={{
-            fontSize: '1.5rem',
-            fontWeight: 600,
-            marginBottom: '0.5rem',
-            color: 'var(--ink)'
-          }}>
-            Hope&apos;s Walk Tracker
-          </h1>
-          <p style={{
-            color: 'var(--muted)',
-            marginBottom: '2rem',
-            fontSize: '0.875rem'
-          }}>
-            Track daily walks and bathroom habits
-          </p>
-          <button onClick={signInWithGoogle} className="btn btn-primary" style={{ width: '100%' }}>
-            Sign in with Google
-          </button>
-          <button onClick={signInAnonymously} className="btn btn-secondary" style={{ width: '100%', marginTop: '0.75rem' }}>
-            Continue as Guest
-          </button>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="btn btn-secondary"
-            style={{ width: '100%', marginTop: '1rem' }}
-          >
-            {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={darkMode ? 'dark' : ''} style={{
       minHeight: '100vh',
@@ -264,77 +190,23 @@ export default function Home() {
             Hope&apos;s Walks
           </h1>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              style={{
-                width: '1.75rem',
-                height: '1.75rem',
-                borderRadius: '50%',
-                border: '1px solid var(--border)',
-                overflow: 'hidden',
-                cursor: 'pointer',
-                padding: 0,
-                background: 'var(--surface)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1rem'
-              }}
-            >
-              {user.user_metadata.avatar_url
-                ? <img src={user.user_metadata.avatar_url} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : '👤'}
-            </button>
-            {showUserMenu && (
-              <div style={{
-                position: 'absolute',
-                right: 0,
-                top: '2.25rem',
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                borderRadius: '0.5rem',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                minWidth: '8rem',
-                zIndex: 100
-              }}>
-                <button
-                  onClick={() => { setShowUserMenu(false); signOut(); }}
-                  style={{
-                    width: '100%',
-                    padding: '0.625rem 1rem',
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    fontSize: '0.875rem',
-                    color: 'var(--ink)'
-                  }}
-                >
-                  Sign out
-                </button>
-              </div>
-            )}
-          </div>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            style={{
-              width: '2rem',
-              height: '2rem',
-              borderRadius: '50%',
-              border: '1px solid var(--border)',
-              background: 'transparent',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1rem'
-            }}
-          >
-            {darkMode ? '☀️' : '🌙'}
-          </button>
-        </div>
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          style={{
+            width: '2rem',
+            height: '2rem',
+            borderRadius: '50%',
+            border: '1px solid var(--border)',
+            background: 'transparent',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1rem'
+          }}
+        >
+          {darkMode ? '☀️' : '🌙'}
+        </button>
       </header>
 
       {/* Streak */}
