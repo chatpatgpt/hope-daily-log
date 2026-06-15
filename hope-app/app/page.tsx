@@ -131,6 +131,21 @@ export default function Home() {
     return streak;
   }, [logs]);
 
+  const dogState = useMemo(() => {
+    const today = new Date().toDateString();
+    const todayWalks = logs.filter(l => l.type === 'walk' && new Date(l.created_at).toDateString() === today);
+
+    if (todayWalks.length > 0 && walkStreak >= 7) {
+      return 'proud'; // Long streak + walked today
+    } else if (todayWalks.length > 0) {
+      return 'happy'; // Walked today
+    } else if (walkStreak > 0) {
+      return 'waiting'; // Has streak but no walk today
+    } else {
+      return 'expectant'; // No streak, no walk today
+    }
+  }, [logs, walkStreak]);
+
   if (loading) {
     return (
       <div className={darkMode ? 'dark' : ''} style={{
@@ -211,9 +226,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Running dog */}
+      {/* Contextual Dog */}
       <div className="dog-track">
-        <div className="dog-runner">
+        <div className={`dog-companion dog-${dogState}`}>
           <svg className="dog-svg" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
             {/* Body */}
             <ellipse className="dog-body-part" cx="50" cy="45" rx="22" ry="16" fill="white" />
@@ -226,7 +241,7 @@ export default function Home() {
               {/* Nose */}
               <circle cx="85" cy="39" r="2" fill="#333" />
               {/* Eye */}
-              <circle cx="75" cy="35" r="2" fill="#333" />
+              <circle cx="75" cy="35" r="2.5" fill="#333" className="dog-eye" />
               {/* Ear */}
               <ellipse className="dog-ear" cx="68" cy="28" rx="5" ry="8" fill="white" />
             </g>
