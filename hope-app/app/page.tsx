@@ -382,14 +382,17 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
       </div>
 
       {/* Weekday Headers */}
-      <div className="calendar-grid" style={{ marginBottom: '0.25rem' }}>
+      <div className="calendar-grid" style={{ marginBottom: '0.5rem' }}>
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
           <div key={day} style={{
             textAlign: 'center',
             fontSize: '0.75rem',
             fontWeight: 600,
             color: 'var(--muted)',
-            padding: '0.5rem 0'
+            padding: '0.5rem 0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}>
             {day}
           </div>

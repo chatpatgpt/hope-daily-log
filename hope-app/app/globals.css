@@ -46,6 +46,7 @@ body {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.25rem;
+  width: 100%;
 }
 
 .calendar-day {
@@ -62,6 +63,8 @@ body {
   position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
+  min-height: 60px;
+  padding: 0.25rem;
 }
 
 .calendar-day:hover:not(.disabled) {
@@ -85,12 +88,17 @@ body {
 .day-number {
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
+  line-height: 1;
 }
 
 .day-indicators {
   display: flex;
   gap: 0.25rem;
   font-size: 1rem;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
 }
 
 /* Buttons */
