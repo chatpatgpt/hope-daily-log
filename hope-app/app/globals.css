@@ -249,25 +249,17 @@ body {
 
 .dog-slider {
   position: absolute;
-  animation: runAcross 8s linear infinite;
+  animation: runAcross 6s linear infinite alternate;
 }
 
 .dog-emoji {
-  display: block;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 2px solid var(--primary);
-  transform: rotate(-5deg);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  background: white;
-}
-
-.dog-emoji img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  filter: brightness(1.8) saturate(0);
+  transform: scaleX(1);
+  animation: flipDog 6s linear infinite alternate;
 }
 
 @keyframes runAcross {
@@ -275,7 +267,22 @@ body {
     left: -60px;
   }
   100% {
-    left: 100%;
+    left: calc(100% - 60px);
+  }
+}
+
+@keyframes flipDog {
+  0% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(1);
+  }
+  50.01% {
+    transform: scaleX(-1);
+  }
+  100% {
+    transform: scaleX(-1);
   }
 }
 

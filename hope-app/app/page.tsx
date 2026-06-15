@@ -215,7 +215,7 @@ export default function Home() {
       <div className="dog-track">
         <div className="dog-slider">
           <div className="dog-emoji">
-            <img src="/hope.jpg" alt="Hope running" />
+            🐕
           </div>
         </div>
       </div>
