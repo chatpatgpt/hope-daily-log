@@ -376,66 +376,37 @@ export default function Home() {
         </button>
       </header>
 
-      {/* Streak */}
-      <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+      {/* Streak & Weather */}
+      <div style={{ marginBottom: '2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
         <div className="streak-badge">
           <span>🔥</span>
-          <span>{walkStreak} day{walkStreak !== 1 ? 's' : ''} walking streak</span>
+          <span>{walkStreak} day{walkStreak !== 1 ? 's' : ''} streak</span>
         </div>
-      </div>
 
-      {/* Weather Banner - always visible */}
-      <>
+        {/* Compact Weather Badge */}
         {weatherLoading && (
-            <div className="weather-banner">
-              <div className="weather-info">
-                <span className="weather-emoji">🌤️</span>
-                <div className="weather-details">
-                  <span className="weather-temp">Loading...</span>
-                </div>
-              </div>
-            </div>
-          )}
+          <div className="weather-compact">
+            <span>🌤️</span>
+            <span>Loading weather...</span>
+          </div>
+        )}
 
-          {weather && (
-            <div className="weather-banner">
-              <div className="weather-info">
-                <span className="weather-emoji">
-                  {getWeatherRecommendation(weather.temp, weather.condition).emoji}
-                </span>
-                <div className="weather-details">
-                  <span className="weather-temp">{weather.temp}°F</span>
-                  <span className="weather-condition">{weather.condition}</span>
-                </div>
-              </div>
-              <div className="weather-recommendation">
-                {getWeatherRecommendation(weather.temp, weather.condition).text}
-              </div>
-            </div>
-          )}
+        {weather && (
+          <div className="weather-compact">
+            <span>{getWeatherRecommendation(weather.temp, weather.condition).emoji}</span>
+            <span>{weather.temp}°F</span>
+            <span className="weather-dot">•</span>
+            <span>{getWeatherRecommendation(weather.temp, weather.condition).text}</span>
+          </div>
+        )}
 
-          {locationError && !weather && (
-            <div className="weather-banner">
-              <div className="weather-info">
-                <span className="weather-emoji">⚠️</span>
-                <div className="weather-details">
-                  <span className="weather-temp">Weather unavailable</span>
-                  <span className="weather-condition">Location or network issue</span>
-                </div>
-              </div>
-              <button
-                onClick={fetchWeather}
-                className="btn btn-primary"
-                style={{
-                  padding: '0.5rem 1rem',
-                  fontSize: '0.875rem'
-                }}
-              >
-                Retry
-              </button>
-            </div>
-          )}
-      </>
+        {locationError && !weather && (
+          <div className="weather-compact" style={{ cursor: 'pointer' }} onClick={fetchWeather}>
+            <span>⚠️</span>
+            <span>Tap to retry weather</span>
+          </div>
+        )}
+      </div>
 
       {/* Contextual Dog */}
       <div className="dog-track">
