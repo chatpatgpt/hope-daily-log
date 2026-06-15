@@ -231,32 +231,32 @@ export default function Home() {
         <div className={`dog-companion dog-${dogState}`}>
           <svg className="dog-svg" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
             {/* Body */}
-            <ellipse className="dog-body-part" cx="50" cy="45" rx="22" ry="16" fill="white" />
+            <ellipse className="dog-body-part" cx="50" cy="45" rx="22" ry="16" fill="#d4a574" />
 
             {/* Head */}
             <g className="dog-head">
-              <circle cx="72" cy="38" r="14" fill="white" />
+              <circle cx="72" cy="38" r="14" fill="#d4a574" />
               {/* Snout */}
-              <ellipse cx="82" cy="40" rx="6" ry="5" fill="white" />
+              <ellipse cx="82" cy="40" rx="6" ry="5" fill="#c49460" />
               {/* Nose */}
               <circle cx="85" cy="39" r="2" fill="#333" />
               {/* Eye */}
               <circle cx="75" cy="35" r="2.5" fill="#333" className="dog-eye" />
               {/* Ear */}
-              <ellipse className="dog-ear" cx="68" cy="28" rx="5" ry="8" fill="white" />
+              <ellipse className="dog-ear" cx="68" cy="28" rx="5" ry="8" fill="#c49460" />
             </g>
 
             {/* Tail */}
-            <path className="dog-tail" d="M 30 42 Q 20 35, 15 30" stroke="white" strokeWidth="6" fill="none" strokeLinecap="round" />
+            <path className="dog-tail" d="M 30 42 Q 20 35, 15 30" stroke="#d4a574" strokeWidth="6" fill="none" strokeLinecap="round" />
 
             {/* Legs */}
             <g className="dog-legs">
               {/* Front legs */}
-              <rect className="leg-front-1" x="60" y="55" width="5" height="18" rx="2.5" fill="white" />
-              <rect className="leg-front-2" x="68" y="55" width="5" height="18" rx="2.5" fill="white" />
+              <rect className="leg-front-1" x="60" y="55" width="5" height="18" rx="2.5" fill="#d4a574" />
+              <rect className="leg-front-2" x="68" y="55" width="5" height="18" rx="2.5" fill="#d4a574" />
               {/* Back legs */}
-              <rect className="leg-back-1" x="35" y="55" width="5" height="18" rx="2.5" fill="white" />
-              <rect className="leg-back-2" x="43" y="55" width="5" height="18" rx="2.5" fill="white" />
+              <rect className="leg-back-1" x="35" y="55" width="5" height="18" rx="2.5" fill="#d4a574" />
+              <rect className="leg-back-2" x="43" y="55" width="5" height="18" rx="2.5" fill="#d4a574" />
             </g>
           </svg>
           <div className="dog-shadow"></div>
