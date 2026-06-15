@@ -12,6 +12,7 @@ export default function Home() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';
@@ -264,18 +265,58 @@ export default function Home() {
           </h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {user.user_metadata.avatar_url && (
-            <img
-              src={user.user_metadata.avatar_url}
-              alt="User"
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
               style={{
                 width: '1.75rem',
                 height: '1.75rem',
                 borderRadius: '50%',
-                border: '1px solid var(--border)'
+                border: '1px solid var(--border)',
+                overflow: 'hidden',
+                cursor: 'pointer',
+                padding: 0,
+                background: 'var(--surface)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1rem'
               }}
-            />
-          )}
+            >
+              {user.user_metadata.avatar_url
+                ? <img src={user.user_metadata.avatar_url} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : '👤'}
+            </button>
+            {showUserMenu && (
+              <div style={{
+                position: 'absolute',
+                right: 0,
+                top: '2.25rem',
+                background: 'var(--card)',
+                border: '1px solid var(--border)',
+                borderRadius: '0.5rem',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                minWidth: '8rem',
+                zIndex: 100
+              }}>
+                <button
+                  onClick={() => { setShowUserMenu(false); signOut(); }}
+                  style={{
+                    width: '100%',
+                    padding: '0.625rem 1rem',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontSize: '0.875rem',
+                    color: 'var(--ink)'
+                  }}
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
             style={{
