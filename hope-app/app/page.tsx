@@ -101,29 +101,62 @@ export default function Home() {
   }
 
   const streakData = useMemo(() => {
-    const sortedDays = [...logs]
-      .filter(l => l.type === 'accident')
+    // Walk Streak: consecutive days with at least one walk
+    const walkDays = [...logs]
+      .filter(l => l.type === 'walk')
       .map(l => new Date(l.created_at).toDateString());
-    const accidentDays = new Set(sortedDays);
-    let currentStreak = 0;
-    let maxStreak = 0;
-    let tempStreak = 0;
+    const walkDaysSet = new Set(walkDays);
+
+    let walkStreak = 0;
+    let maxWalkStreak = 0;
+    let tempWalkStreak = 0;
 
     for (let i = 0; i < 365; i++) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateStr = date.toDateString();
-      if (!accidentDays.has(dateStr)) {
-        tempStreak++;
-        if (i === 0) currentStreak = tempStreak;
+      if (walkDaysSet.has(dateStr)) {
+        tempWalkStreak++;
+        if (i === 0) walkStreak = tempWalkStreak;
       } else {
-        maxStreak = Math.max(maxStreak, tempStreak);
-        tempStreak = 0;
-        if (i === 0) currentStreak = 0;
+        maxWalkStreak = Math.max(maxWalkStreak, tempWalkStreak);
+        tempWalkStreak = 0;
+        if (i === 0) walkStreak = 0;
       }
     }
-    maxStreak = Math.max(maxStreak, tempStreak);
-    return { currentStreak, maxStreak };
+    maxWalkStreak = Math.max(maxWalkStreak, tempWalkStreak);
+
+    // Clean Streak: consecutive days without accidents
+    const accidentDays = [...logs]
+      .filter(l => l.type === 'accident')
+      .map(l => new Date(l.created_at).toDateString());
+    const accidentDaysSet = new Set(accidentDays);
+
+    let cleanStreak = 0;
+    let maxCleanStreak = 0;
+    let tempCleanStreak = 0;
+
+    for (let i = 0; i < 365; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toDateString();
+      if (!accidentDaysSet.has(dateStr)) {
+        tempCleanStreak++;
+        if (i === 0) cleanStreak = tempCleanStreak;
+      } else {
+        maxCleanStreak = Math.max(maxCleanStreak, tempCleanStreak);
+        tempCleanStreak = 0;
+        if (i === 0) cleanStreak = 0;
+      }
+    }
+    maxCleanStreak = Math.max(maxCleanStreak, tempCleanStreak);
+
+    return {
+      walkStreak,
+      maxWalkStreak,
+      cleanStreak,
+      maxCleanStreak
+    };
   }, [logs]);
 
   if (loading) {
@@ -247,10 +280,11 @@ export default function Home() {
         <header className="card" style={{
           margin: '1rem',
           borderRadius: '0 0 24px 24px',
-          borderTop: 'none'
+          borderTop: 'none',
+          padding: '1.25rem'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
               <div style={{
                 width: '3.5rem',
                 height: '3.5rem',
@@ -263,36 +297,14 @@ export default function Home() {
               </div>
               <h1 style={{
                 fontFamily: 'var(--font-bubblegum)',
-                fontSize: '1.75rem',
+                fontSize: '2rem',
                 color: 'var(--ink)',
-                lineHeight: 1.2
+                lineHeight: 1
               }}>
-                Hope&apos;s<br/>Tracker
+                Hope&apos;s Tracker
               </h1>
             </div>
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              style={{
-                padding: '0.75rem',
-                borderRadius: '50%',
-                border: '3px solid var(--ink)',
-                background: 'var(--surface)',
-                cursor: 'pointer',
-                fontSize: '1.5rem',
-                lineHeight: 1,
-                flexShrink: 0
-              }}
-            >
-              {darkMode ? '☀️' : '🌙'}
-            </button>
-          </div>
-          <div style={{
-            marginTop: '1rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
               {user.user_metadata.avatar_url && (
                 <img
                   src={user.user_metadata.avatar_url}
@@ -301,29 +313,26 @@ export default function Home() {
                     width: '2rem',
                     height: '2rem',
                     borderRadius: '50%',
-                    border: '3px solid var(--primary)'
+                    border: '2px solid var(--muted)',
+                    opacity: 0.7
                   }}
                 />
               )}
-              <span style={{ fontWeight: 700, color: 'var(--ink)' }}>
-                {user.user_metadata.full_name || 'Friend'}
-              </span>
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                style={{
+                  padding: '0.5rem',
+                  borderRadius: '50%',
+                  border: '2px solid var(--ink)',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  fontSize: '1.25rem',
+                  lineHeight: 1
+                }}
+              >
+                {darkMode ? '☀️' : '🌙'}
+              </button>
             </div>
-            <button
-              onClick={signOut}
-              style={{
-                padding: '0.5rem 1rem',
-                borderRadius: '100px',
-                border: '2px solid var(--muted)',
-                background: 'transparent',
-                color: 'var(--muted)',
-                fontWeight: 700,
-                cursor: 'pointer',
-                fontSize: '0.875rem'
-              }}
-            >
-              Leave
-            </button>
           </div>
         </header>
 
@@ -392,7 +401,7 @@ export default function Home() {
 
 function HomeTab({ logs, streakData }: {
   logs: HopeLog[],
-  streakData: { currentStreak: number, maxStreak: number }
+  streakData: { walkStreak: number, maxWalkStreak: number, cleanStreak: number, maxCleanStreak: number }
 }) {
   const todayLogs = logs.filter(l =>
     new Date(l.created_at).toDateString() === new Date().toDateString()
@@ -404,20 +413,26 @@ function HomeTab({ logs, streakData }: {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {/* Streak Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-        <div className="card-primary slide-in" style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-          <div style={{ fontSize: '4rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-            {streakData.currentStreak}
+        <div className="card-primary slide-in" style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
+          <div style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+            {streakData.walkStreak}
           </div>
-          <div style={{ fontSize: '1.125rem', fontWeight: 700, opacity: 0.9 }}>
-            Day Streak! 🔥
+          <div style={{ fontSize: '1rem', fontWeight: 700, opacity: 0.9 }}>
+            Walk Streak 🔥
+          </div>
+          <div style={{ fontSize: '0.875rem', fontWeight: 600, opacity: 0.7, marginTop: '0.25rem' }}>
+            Best: {streakData.maxWalkStreak}
           </div>
         </div>
-        <div className="card-accent slide-in delay-1" style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-          <div style={{ fontSize: '4rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-            {streakData.maxStreak}
+        <div className="card-accent slide-in delay-1" style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
+          <div style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+            {streakData.cleanStreak}
           </div>
-          <div style={{ fontSize: '1.125rem', fontWeight: 700, opacity: 0.9 }}>
-            Best Ever! 🏆
+          <div style={{ fontSize: '1rem', fontWeight: 700, opacity: 0.9 }}>
+            Clean Streak ⭐
+          </div>
+          <div style={{ fontSize: '0.875rem', fontWeight: 600, opacity: 0.7, marginTop: '0.25rem' }}>
+            Best: {streakData.maxCleanStreak}
           </div>
         </div>
       </div>
@@ -480,9 +495,9 @@ function HomeTab({ logs, streakData }: {
                   borderColor: log.type === 'walk' ? 'var(--primary)' : 'var(--accent)'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: log.type === 'walk' && (log.pooped || log.peed) ? '0.5rem' : 0 }}>
                   <span style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-                    {log.type === 'walk' ? '🦴 Walk' : '⚠️ Oopsie'}
+                    {log.type === 'walk' ? '🦴 Walk' : `⚠️ ${log.subtype === 'pee' ? 'Pee' : 'Poop'} Inside`}
                   </span>
                   <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--muted)' }}>
                     {new Date(log.created_at).toLocaleTimeString('en-US', {
@@ -491,6 +506,22 @@ function HomeTab({ logs, streakData }: {
                     })}
                   </span>
                 </div>
+                {log.type === 'walk' && (log.pooped || log.peed) && (
+                  <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 600 }}>
+                    {log.pooped && <span style={{
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '100px',
+                      background: 'var(--primary)',
+                      color: 'white'
+                    }}>💩 Pooped</span>}
+                    {log.peed && <span style={{
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '100px',
+                      background: 'var(--primary)',
+                      color: 'white'
+                    }}>💧 Peed</span>}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -668,6 +699,8 @@ function LogModal({ type, onClose, onSubmit }: {
 }) {
   const [subtype, setSubtype] = useState<'pee' | 'poop'>('pee');
   const [duration, setDuration] = useState('');
+  const [pooped, setPooped] = useState(false);
+  const [peed, setPeed] = useState(false);
 
   function handleSubmit() {
     const logData: Partial<HopeLog> = {
@@ -676,8 +709,13 @@ function LogModal({ type, onClose, onSubmit }: {
     };
     if (type === 'accident') {
       logData.subtype = subtype;
-    } else if (duration) {
-      logData.duration = parseInt(duration);
+    } else {
+      // For walks
+      if (duration) {
+        logData.duration = parseInt(duration);
+      }
+      logData.pooped = pooped;
+      logData.peed = peed;
     }
     onSubmit(logData);
   }
@@ -758,42 +796,91 @@ function LogModal({ type, onClose, onSubmit }: {
         )}
 
         {type === 'walk' && (
-          <div style={{ marginBottom: '2rem' }}>
-            <label style={{
-              display: 'block',
-              fontWeight: 700,
-              fontSize: '1.125rem',
-              color: 'var(--ink)',
-              marginBottom: '1rem'
-            }}>
-              How long? (minutes)
-            </label>
-            <input
-              type="number"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              placeholder="Like 15"
-              style={{
-                width: '100%',
-                padding: '1rem 1.5rem',
-                borderRadius: '16px',
-                border: '3px solid var(--ink)',
-                background: 'var(--surface)',
-                color: 'var(--ink)',
+          <>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{
+                display: 'block',
                 fontWeight: 700,
                 fontSize: '1.125rem',
-                fontFamily: 'inherit'
-              }}
-            />
-            <p style={{
-              marginTop: '0.5rem',
-              color: 'var(--muted)',
-              fontSize: '0.875rem',
-              fontWeight: 600
-            }}>
-              You can skip this!
-            </p>
-          </div>
+                color: 'var(--ink)',
+                marginBottom: '1rem'
+              }}>
+                What did Hope do? (check all)
+              </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <button
+                  onClick={() => setPooped(!pooped)}
+                  style={{
+                    padding: '1rem 1.5rem',
+                    borderRadius: '16px',
+                    border: '3px solid',
+                    borderColor: pooped ? 'var(--primary)' : 'var(--ink)',
+                    background: pooped ? 'var(--primary)' : 'transparent',
+                    color: pooped ? 'white' : 'var(--ink)',
+                    fontWeight: 700,
+                    fontSize: '1.125rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <span>💩 Pooped outside</span>
+                  <span style={{ fontSize: '1.5rem' }}>{pooped ? '✓' : '○'}</span>
+                </button>
+                <button
+                  onClick={() => setPeed(!peed)}
+                  style={{
+                    padding: '1rem 1.5rem',
+                    borderRadius: '16px',
+                    border: '3px solid',
+                    borderColor: peed ? 'var(--primary)' : 'var(--ink)',
+                    background: peed ? 'var(--primary)' : 'transparent',
+                    color: peed ? 'white' : 'var(--ink)',
+                    fontWeight: 700,
+                    fontSize: '1.125rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <span>💧 Peed outside</span>
+                  <span style={{ fontSize: '1.5rem' }}>{peed ? '✓' : '○'}</span>
+                </button>
+              </div>
+            </div>
+            <div style={{ marginBottom: '2rem' }}>
+              <label style={{
+                display: 'block',
+                fontWeight: 700,
+                fontSize: '1.125rem',
+                color: 'var(--ink)',
+                marginBottom: '1rem'
+              }}>
+                How long? (minutes, optional)
+              </label>
+              <input
+                type="number"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                placeholder="Like 15"
+                style={{
+                  width: '100%',
+                  padding: '1rem 1.5rem',
+                  borderRadius: '16px',
+                  border: '3px solid var(--ink)',
+                  background: 'var(--surface)',
+                  color: 'var(--ink)',
+                  fontWeight: 700,
+                  fontSize: '1.125rem',
+                  fontFamily: 'inherit'
+                }}
+              />
+            </div>
+          </>
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>

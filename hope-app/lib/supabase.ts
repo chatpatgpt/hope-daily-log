@@ -16,5 +16,7 @@ export interface HopeLog {
   user_id: string;
   user_email?: string;
   duration?: number;
+  pooped?: boolean;  // For walks: did Hope poop outside?
+  peed?: boolean;    // For walks: did Hope pee outside?
   created_at: string;
 }
