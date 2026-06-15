@@ -172,9 +172,8 @@ export default function Home() {
 
   async function fetchWeather() {
     const debug: string[] = [];
-    debug.push('🌤️ Starting weather fetch...');
+    debug.push('🌤️ Starting weather fetch (Weather.gov)...');
     debug.push(`Has walked today? ${hasWalkedToday}`);
-    debug.push(`API Key exists? ${!!process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}`);
     setDebugInfo([...debug]);
 
     setWeatherLoading(true);
@@ -193,31 +192,70 @@ export default function Home() {
       debug.push(`📍 Location: ${latitude.toFixed(2)}, ${longitude.toFixed(2)}`);
       setDebugInfo([...debug]);
 
-      const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || 'demo';
-      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=imperial&appid=${apiKey}`;
-      debug.push('🌐 Fetching weather data...');
+      // Step 1: Get weather station metadata from Weather.gov
+      debug.push('🌐 Fetching weather station...');
       setDebugInfo([...debug]);
 
-      const response = await fetch(url);
-      debug.push(`📥 Response: ${response.status}`);
+      const pointsUrl = `https://api.weather.gov/points/${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+      const pointsResponse = await fetch(pointsUrl);
+      debug.push(`📥 Points response: ${pointsResponse.status}`);
       setDebugInfo([...debug]);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        debug.push(`❌ API Error: ${errorText.substring(0, 100)}`);
-        setDebugInfo([...debug]);
-        throw new Error(`Weather fetch failed: ${response.status}`);
+      if (!pointsResponse.ok) {
+        throw new Error(`Weather.gov points failed: ${pointsResponse.status}`);
       }
 
-      const data = await response.json();
-      debug.push(`✅ Got weather: ${data.main.temp}°F, ${data.weather[0].main}`);
+      const pointsData = await pointsResponse.json();
+      const observationStationsUrl = pointsData.properties.observationStations;
+
+      // Step 2: Get nearest observation station
+      debug.push('🌐 Finding nearest station...');
       setDebugInfo([...debug]);
 
+      const stationsResponse = await fetch(observationStationsUrl);
+      if (!stationsResponse.ok) {
+        throw new Error(`Stations fetch failed: ${stationsResponse.status}`);
+      }
+
+      const stationsData = await stationsResponse.json();
+      const nearestStation = stationsData.features[0].id;
+
+      // Step 3: Get current observations
+      debug.push('🌐 Getting current weather...');
+      setDebugInfo([...debug]);
+
+      const observationUrl = `${nearestStation}/observations/latest`;
+      const obsResponse = await fetch(observationUrl);
+      debug.push(`📥 Weather response: ${obsResponse.status}`);
+      setDebugInfo([...debug]);
+
+      if (!obsResponse.ok) {
+        throw new Error(`Observation fetch failed: ${obsResponse.status}`);
+      }
+
+      const obsData = await obsResponse.json();
+      const props = obsData.properties;
+
+      // Convert Celsius to Fahrenheit
+      const tempC = props.temperature.value;
+      const tempF = tempC !== null ? Math.round((tempC * 9/5) + 32) : null;
+      const feelsLikeC = props.heatIndex.value || props.windChill.value || tempC;
+      const feelsLikeF = feelsLikeC !== null ? Math.round((feelsLikeC * 9/5) + 32) : tempF;
+
+      const condition = props.textDescription || 'Clear';
+
+      debug.push(`✅ Got weather: ${tempF}°F, ${condition}`);
+      setDebugInfo([...debug]);
+
+      if (tempF === null) {
+        throw new Error('Temperature data unavailable');
+      }
+
       setWeather({
-        temp: Math.round(data.main.temp),
-        condition: data.weather[0].main,
-        icon: data.weather[0].icon,
-        feelsLike: Math.round(data.main.feels_like)
+        temp: tempF,
+        condition: condition,
+        icon: '', // Weather.gov doesn't provide icons
+        feelsLike: feelsLikeF || tempF
       });
       setLocationError(false);
       debug.push('✅ Weather displayed!');
