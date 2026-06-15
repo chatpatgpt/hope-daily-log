@@ -44,9 +44,11 @@ body {
 /* Calendar styles */
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.25rem;
   width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .calendar-day {
@@ -65,6 +67,8 @@ body {
   border: 1px solid var(--border);
   min-height: 60px;
   padding: 0.25rem;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .calendar-day:hover:not(.disabled) {
