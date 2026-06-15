@@ -169,6 +169,10 @@ export default function Home() {
   }, [hasWalkedToday, weather, weatherLoading, locationError]);
 
   async function fetchWeather() {
+    console.log('🌤️ Fetching weather...');
+    console.log('Has walked today?', hasWalkedToday);
+    console.log('API Key exists?', !!process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY);
+
     setWeatherLoading(true);
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -179,14 +183,24 @@ export default function Home() {
       });
 
       const { latitude, longitude } = position.coords;
-      const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || 'demo';
-      const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=imperial&appid=${apiKey}`
-      );
+      console.log('📍 Location:', latitude, longitude);
 
-      if (!response.ok) throw new Error('Weather fetch failed');
+      const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || 'demo';
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=imperial&appid=${apiKey}`;
+      console.log('🌐 Fetching from:', url.replace(apiKey, 'API_KEY'));
+
+      const response = await fetch(url);
+      console.log('📥 Response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API Error:', errorText);
+        throw new Error(`Weather fetch failed: ${response.status}`);
+      }
 
       const data = await response.json();
+      console.log('✅ Weather data:', data);
+
       setWeather({
         temp: Math.round(data.main.temp),
         condition: data.weather[0].main,
@@ -194,8 +208,9 @@ export default function Home() {
         feelsLike: Math.round(data.main.feels_like)
       });
       setLocationError(false);
+      console.log('✅ Weather set successfully');
     } catch (err) {
-      console.error('Weather error:', err);
+      console.error('❌ Weather error:', err);
       setLocationError(true);
     } finally {
       setWeatherLoading(false);
