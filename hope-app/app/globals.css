@@ -1,47 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  /* Kid-friendly palette - Saturday morning cartoon energy */
-  --bg: oklch(1.000 0.000 0); /* Pure white - clean canvas */
-  --surface: oklch(0.98 0.005 279); /* Barely tinted surface */
-  --ink: oklch(0.25 0.015 279); /* Deep readable text */
-  --muted: oklch(0.55 0.012 279); /* Secondary text */
-
-  /* Brand colors - bright and playful */
-  --primary: oklch(0.62 0.18 145); /* Bright grass green - energetic, positive */
-  --accent: oklch(0.70 0.21 38); /* Sunny orange-yellow - warm, happy */
-  --purple: oklch(0.65 0.19 295); /* Fun purple */
-  --pink: oklch(0.72 0.19 345); /* Bubblegum pink */
-  --blue: oklch(0.68 0.16 235); /* Sky blue */
+  /* Clean, minimal palette */
+  --bg: oklch(0.98 0.000 0);
+  --surface: oklch(0.95 0.000 0);
+  --border: oklch(0.85 0.000 0);
+  --ink: oklch(0.20 0.000 0);
+  --muted: oklch(0.50 0.000 0);
+  --light-text: oklch(0.65 0.000 0);
 
   /* Semantic colors */
-  --success: oklch(0.62 0.18 145);
-  --warning: oklch(0.70 0.21 38);
-  --error: oklch(0.62 0.19 15);
+  --primary: oklch(0.55 0.15 145); /* Green for success */
+  --accent: oklch(0.65 0.18 38); /* Orange for attention */
+  --error: oklch(0.55 0.15 15); /* Red for missed */
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px oklch(0.25 0.015 279 / 0.08);
-  --shadow-md: 0 4px 16px oklch(0.25 0.015 279 / 0.12);
-  --shadow-lg: 0 8px 32px oklch(0.25 0.015 279 / 0.16);
-  --shadow-fun: 0 6px 0 oklch(0.25 0.015 279 / 0.15);
+  --shadow: 0 1px 3px oklch(0.20 0.000 0 / 0.08);
 }
 
 .dark {
-  --bg: oklch(0.10 0.000 0);
-  --surface: oklch(0.14 0.005 279);
-  --ink: oklch(0.95 0.005 279);
-  --muted: oklch(0.65 0.008 279);
-
-  --primary: oklch(0.68 0.18 145);
-  --accent: oklch(0.76 0.19 38);
-  --purple: oklch(0.70 0.17 295);
-  --pink: oklch(0.76 0.17 345);
-  --blue: oklch(0.72 0.14 235);
-}
-
-@theme inline {
-  --font-sans: var(--font-fredoka);
-  --font-display: var(--font-bubblegum);
+  --bg: oklch(0.12 0.000 0);
+  --surface: oklch(0.16 0.000 0);
+  --border: oklch(0.25 0.000 0);
+  --ink: oklch(0.95 0.000 0);
+  --muted: oklch(0.60 0.000 0);
+  --light-text: oklch(0.50 0.000 0);
 }
 
 * {
@@ -53,252 +36,179 @@
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-fredoka), -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
 }
 
-/* Smooth hop animation */
-@keyframes hop {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-12px) rotate(-3deg); }
+/* Calendar styles */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
 }
 
-.hop {
-  animation: hop 1.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
-/* Gentle wiggle */
-@keyframes wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-8deg); }
-  75% { transform: rotate(8deg); }
+.calendar-day:hover:not(.disabled) {
+  background: var(--border);
 }
 
-.wiggle {
-  animation: wiggle 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+.calendar-day.today {
+  border: 2px solid var(--primary);
+  background: oklch(0.55 0.15 145 / 0.1);
 }
 
-/* Slide in from bottom */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.calendar-day.disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
-.slide-in {
-  animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.calendar-day.other-month {
+  opacity: 0.3;
 }
 
-/* Pop in scale */
-@keyframes popIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  70% {
-    transform: scale(1.02);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+.day-number {
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
 }
 
-.pop-in {
-  animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.day-indicators {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 1rem;
 }
 
-/* Stagger delays */
-.delay-1 { animation-delay: 0.1s; opacity: 0; }
-.delay-2 { animation-delay: 0.2s; opacity: 0; }
-.delay-3 { animation-delay: 0.3s; opacity: 0; }
-.delay-4 { animation-delay: 0.4s; opacity: 0; }
-.delay-5 { animation-delay: 0.5s; opacity: 0; }
+/* Buttons */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
 
-/* Fun button styles */
 .btn-primary {
   background: var(--primary);
   color: white;
-  border: none;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 1.125rem;
-  padding: 1rem 2rem;
-  box-shadow: var(--shadow-fun);
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  cursor: pointer;
-  position: relative;
-  top: 0;
 }
 
 .btn-primary:hover {
-  top: -2px;
-  box-shadow: 0 8px 0 oklch(0.25 0.015 279 / 0.15);
-}
-
-.btn-primary:active {
-  top: 4px;
-  box-shadow: 0 2px 0 oklch(0.25 0.015 279 / 0.15);
+  opacity: 0.9;
 }
 
 .btn-secondary {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 1.125rem;
-  padding: 1rem 2rem;
-  box-shadow: var(--shadow-fun);
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  cursor: pointer;
-  position: relative;
-  top: 0;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
 }
 
 .btn-secondary:hover {
-  top: -2px;
-  box-shadow: 0 8px 0 oklch(0.25 0.015 279 / 0.15);
+  background: var(--border);
 }
 
-.btn-secondary:active {
-  top: 4px;
-  box-shadow: 0 2px 0 oklch(0.25 0.015 279 / 0.15);
-}
-
-/* Card styles */
+/* Card */
 .card {
   background: var(--surface);
-  border: 4px solid var(--ink);
-  border-radius: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: var(--shadow-fun);
-  position: relative;
+  box-shadow: var(--shadow);
 }
 
-.card-primary {
-  background: var(--primary);
-  color: white;
-  border-color: oklch(0.52 0.18 145);
-}
-
-.card-accent {
-  background: var(--accent);
-  color: white;
-  border-color: oklch(0.60 0.21 38);
-}
-
-.card-purple {
-  background: var(--purple);
-  color: white;
-  border-color: oklch(0.55 0.19 295);
-}
-
-.card-pink {
-  background: var(--pink);
-  color: white;
-  border-color: oklch(0.62 0.19 345);
-}
-
-.card-blue {
-  background: var(--blue);
-  color: white;
-  border-color: oklch(0.58 0.16 235);
-}
-
-/* Badge styles */
-.badge {
+/* Streak badge */
+.streak-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border-radius: 100px;
-  font-weight: 700;
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
   font-size: 0.875rem;
-  border: 3px solid currentColor;
 }
 
-.badge-success {
-  background: var(--success);
-  color: white;
+/* Modal backdrop */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: oklch(0.20 0.000 0 / 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 100;
+  animation: fadeIn 0.15s ease;
 }
 
-.badge-warning {
-  background: var(--warning);
-  color: white;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Star decoration */
-.star-burst {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  opacity: 0.15;
-  pointer-events: none;
-}
-
-.star-burst::before,
-.star-burst::after {
-  content: '✦';
-  position: absolute;
-  font-size: 40px;
-  color: currentColor;
-}
-
-.star-burst::after {
-  animation: spin 3s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* Paw print decoration */
-.paw-print {
-  opacity: 0.08;
-  position: absolute;
-  font-size: 3rem;
-  pointer-events: none;
-  transform: rotate(-25deg);
-}
-
-/* Comic-style emphasis lines */
-.emphasis-lines {
-  position: absolute;
-  inset: -8px;
-  border-radius: inherit;
-  pointer-events: none;
-}
-
-.emphasis-lines::before,
-.emphasis-lines::after {
-  content: '';
-  position: absolute;
-  background: currentColor;
-  opacity: 0.2;
-}
-
-.emphasis-lines::before {
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 400px;
   width: 100%;
-  height: 4px;
-  top: -8px;
-  left: 0;
-  border-radius: 4px;
+  box-shadow: 0 20px 40px oklch(0.20 0.000 0 / 0.2);
+  animation: slideUp 0.2s ease;
 }
 
-.emphasis-lines::after {
-  width: 4px;
-  height: 100%;
-  left: -8px;
-  top: 0;
-  border-radius: 4px;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Toggle button */
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.15s ease;
+}
+
+.toggle-btn.active {
+  border-color: var(--primary);
+  background: oklch(0.55 0.15 145 / 0.1);
+  color: var(--primary);
+}
+
+.toggle-btn:hover:not(.active) {
+  border-color: var(--muted);
 }
 
 /* Reduced motion */

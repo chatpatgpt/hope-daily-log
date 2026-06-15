@@ -8,23 +8,20 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [logs, setLogs] = useState<HopeLog[]>([]);
-  const [activeTab, setActiveTab] = useState<'home' | 'log' | 'stats'>('home');
   const [darkMode, setDarkMode] = useState(false);
-  const [showModal, setShowModal] = useState<'walk' | 'accident' | null>(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';
     setDarkMode(savedDarkMode);
-    if (typeof document !== 'undefined') {
-      document.body.className = savedDarkMode ? 'dark' : '';
-    }
+    document.body.className = savedDarkMode ? 'dark' : '';
   }, []);
 
   useEffect(() => {
     localStorage.setItem('darkMode', String(darkMode));
-    if (typeof document !== 'undefined') {
-      document.body.className = darkMode ? 'dark' : '';
-    }
+    document.body.className = darkMode ? 'dark' : '';
   }, [darkMode]);
 
   useEffect(() => {
@@ -33,9 +30,7 @@ export default function Home() {
       setUser(session?.user ?? null);
       setLoading(false);
     });
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
+    return () => authListener.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -58,7 +53,7 @@ export default function Home() {
         redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/` : undefined
       }
     });
-    if (error) alert('Oops! Could not sign in: ' + error.message);
+    if (error) alert('Could not sign in: ' + error.message);
   }
 
   async function signOut() {
@@ -85,78 +80,68 @@ export default function Home() {
     return () => supabase.removeChannel(channel);
   }
 
-  async function addLog(logData: Partial<HopeLog>) {
-    if (!user) return;
-    const { error } = await supabase.from('hope_logs').insert([{
-      ...logData,
-      user_id: user.id,
-      user_email: user.email,
-      person: user.user_metadata.full_name || user.email?.split('@')[0] || 'Friend'
-    }]);
-    if (error) {
-      alert('Oops! Could not save: ' + error.message);
-    } else {
-      setShowModal(null);
+  function handleDayClick(date: Date) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const clickedDate = new Date(date);
+    clickedDate.setHours(0, 0, 0, 0);
+
+    if (clickedDate.getTime() === today.getTime()) {
+      setSelectedDay(date);
+      setShowModal(true);
     }
   }
 
-  const streakData = useMemo(() => {
-    // Walk Streak: consecutive days with at least one walk
+  async function saveDayLog(pooped: boolean, peed: boolean) {
+    if (!user || !selectedDay) return;
+
+    const dayStr = selectedDay.toDateString();
+    const existingLog = logs.find(l =>
+      l.type === 'walk' && new Date(l.created_at).toDateString() === dayStr
+    );
+
+    try {
+      if (existingLog) {
+        // Update existing walk
+        await supabase
+          .from('hope_logs')
+          .update({ pooped, peed })
+          .eq('id', existingLog.id);
+      } else {
+        // Create new walk
+        await supabase.from('hope_logs').insert([{
+          type: 'walk',
+          pooped,
+          peed,
+          user_id: user.id,
+          user_email: user.email,
+          person: user.user_metadata.full_name || user.email?.split('@')[0] || 'User',
+          created_at: selectedDay.toISOString()
+        }]);
+      }
+      setShowModal(false);
+    } catch (err) {
+      alert('Could not save: ' + (err as Error).message);
+    }
+  }
+
+  const walkStreak = useMemo(() => {
     const walkDays = [...logs]
       .filter(l => l.type === 'walk')
       .map(l => new Date(l.created_at).toDateString());
     const walkDaysSet = new Set(walkDays);
 
-    let walkStreak = 0;
-    let maxWalkStreak = 0;
-    let tempWalkStreak = 0;
-
+    let streak = 0;
     for (let i = 0; i < 365; i++) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      const dateStr = date.toDateString();
-      if (walkDaysSet.has(dateStr)) {
-        tempWalkStreak++;
-        if (i === 0) walkStreak = tempWalkStreak;
+      if (walkDaysSet.has(date.toDateString())) {
+        streak++;
       } else {
-        maxWalkStreak = Math.max(maxWalkStreak, tempWalkStreak);
-        tempWalkStreak = 0;
-        if (i === 0) walkStreak = 0;
+        break;
       }
     }
-    maxWalkStreak = Math.max(maxWalkStreak, tempWalkStreak);
-
-    // Clean Streak: consecutive days without accidents
-    const accidentDays = [...logs]
-      .filter(l => l.type === 'accident')
-      .map(l => new Date(l.created_at).toDateString());
-    const accidentDaysSet = new Set(accidentDays);
-
-    let cleanStreak = 0;
-    let maxCleanStreak = 0;
-    let tempCleanStreak = 0;
-
-    for (let i = 0; i < 365; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toDateString();
-      if (!accidentDaysSet.has(dateStr)) {
-        tempCleanStreak++;
-        if (i === 0) cleanStreak = tempCleanStreak;
-      } else {
-        maxCleanStreak = Math.max(maxCleanStreak, tempCleanStreak);
-        tempCleanStreak = 0;
-        if (i === 0) cleanStreak = 0;
-      }
-    }
-    maxCleanStreak = Math.max(maxCleanStreak, tempCleanStreak);
-
-    return {
-      walkStreak,
-      maxWalkStreak,
-      cleanStreak,
-      maxCleanStreak
-    };
+    return streak;
   }, [logs]);
 
   if (loading) {
@@ -165,32 +150,20 @@ export default function Home() {
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        background: 'var(--bg)'
+        justifyContent: 'center'
       }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{
-            width: '10rem',
-            height: '10rem',
+            width: '4rem',
+            height: '4rem',
             borderRadius: '50%',
-            border: '6px solid var(--primary)',
+            border: '3px solid var(--primary)',
             overflow: 'hidden',
-            margin: '0 auto 1.5rem',
-            boxShadow: 'var(--shadow-lg)'
-          }} className="hop">
+            margin: '0 auto 1rem'
+          }}>
             <img src="/hope.jpg" alt="Hope" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <h1 style={{
-            fontFamily: 'var(--font-bubblegum)',
-            fontSize: '2.5rem',
-            color: 'var(--ink)',
-            marginBottom: '0.5rem'
-          }}>
-            Loading Hope...
-          </h1>
-          <p style={{ color: 'var(--muted)', fontSize: '1.25rem', fontWeight: 600 }}>
-            Woof woof! 🦴
-          </p>
+          <p style={{ color: 'var(--muted)', fontWeight: 500 }}>Loading...</p>
         </div>
       </div>
     );
@@ -203,66 +176,43 @@ export default function Home() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'var(--bg)',
         padding: '2rem'
       }}>
-        <div className="card slide-in" style={{
-          maxWidth: '500px',
-          width: '100%',
-          textAlign: 'center',
-          padding: '3rem 2rem'
-        }}>
+        <div className="card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}>
           <div style={{
-            width: '12rem',
-            height: '12rem',
+            width: '6rem',
+            height: '6rem',
             borderRadius: '50%',
-            border: '6px solid var(--primary)',
+            border: '3px solid var(--primary)',
             overflow: 'hidden',
-            margin: '0 auto 1.5rem',
-            boxShadow: 'var(--shadow-lg)'
-          }} className="hop">
+            margin: '0 auto 1.5rem'
+          }}>
             <img src="/hope.jpg" alt="Hope" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <h1 style={{
-            fontFamily: 'var(--font-bubblegum)',
-            fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
-            color: 'var(--ink)',
-            marginBottom: '1rem',
-            lineHeight: 1.2
+            fontSize: '1.5rem',
+            fontWeight: 600,
+            marginBottom: '0.5rem',
+            color: 'var(--ink)'
           }}>
-            Hope&apos;s Tracker!
+            Hope&apos;s Walk Tracker
           </h1>
           <p style={{
             color: 'var(--muted)',
-            fontSize: '1.25rem',
-            fontWeight: 600,
-            marginBottom: '2.5rem'
+            marginBottom: '2rem',
+            fontSize: '0.875rem'
           }}>
-            Track walks, earn stars, and help Hope be the best pup! ⭐
+            Track daily walks and bathroom habits
           </p>
-          <button
-            onClick={signInWithGoogle}
-            className="btn-primary"
-            style={{ width: '100%', fontSize: '1.375rem', padding: '1.25rem 2rem' }}
-          >
-            <span style={{ fontSize: '1.5rem', marginRight: '0.75rem' }}>🚀</span>
-            Let&apos;s Start!
+          <button onClick={signInWithGoogle} className="btn btn-primary" style={{ width: '100%' }}>
+            Sign in with Google
           </button>
           <button
             onClick={() => setDarkMode(!darkMode)}
-            style={{
-              marginTop: '1.5rem',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '100px',
-              border: '3px solid var(--ink)',
-              background: 'transparent',
-              color: 'var(--ink)',
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontSize: '1rem'
-            }}
+            className="btn btn-secondary"
+            style={{ width: '100%', marginTop: '1rem' }}
           >
-            {darkMode ? '☀️ Light' : '🌙 Dark'}
+            {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </button>
         </div>
       </div>
@@ -272,639 +222,287 @@ export default function Home() {
   return (
     <div className={darkMode ? 'dark' : ''} style={{
       minHeight: '100vh',
-      background: 'var(--bg)',
-      paddingBottom: '8rem'
+      padding: '1rem',
+      maxWidth: '600px',
+      margin: '0 auto'
     }}>
-      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-        {/* Header */}
-        <header className="card" style={{
-          margin: '1rem',
-          borderRadius: '0 0 24px 24px',
-          borderTop: 'none',
-          padding: '1.25rem'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
-              <div style={{
-                width: '3.5rem',
-                height: '3.5rem',
-                borderRadius: '50%',
-                border: '4px solid var(--primary)',
-                overflow: 'hidden',
-                flexShrink: 0
-              }}>
-                <img src="/hope.jpg" alt="Hope" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-              <h1 style={{
-                fontFamily: 'var(--font-bubblegum)',
-                fontSize: '2rem',
-                color: 'var(--ink)',
-                lineHeight: 1
-              }}>
-                Hope&apos;s Tracker
-              </h1>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-              {user.user_metadata.avatar_url && (
-                <img
-                  src={user.user_metadata.avatar_url}
-                  alt="You"
-                  style={{
-                    width: '2rem',
-                    height: '2rem',
-                    borderRadius: '50%',
-                    border: '2px solid var(--muted)',
-                    opacity: 0.7
-                  }}
-                />
-              )}
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                style={{
-                  padding: '0.5rem',
-                  borderRadius: '50%',
-                  border: '2px solid var(--ink)',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  fontSize: '1.25rem',
-                  lineHeight: 1
-                }}
-              >
-                {darkMode ? '☀️' : '🌙'}
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <main style={{ padding: '1rem' }}>
-          {activeTab === 'home' && <HomeTab logs={logs} streakData={streakData} />}
-          {activeTab === 'log' && <LogTab onShowModal={setShowModal} />}
-          {activeTab === 'stats' && <StatsTab logs={logs} />}
-        </main>
-
-        {/* Bottom Navigation */}
-        <nav className="card" style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          borderRadius: '24px 24px 0 0',
-          borderBottom: 'none',
-          padding: '1.25rem',
-          zIndex: 10
-        }}>
+      {/* Header */}
+      <header style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '2rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{
-            maxWidth: '600px',
-            margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr 1fr',
-            gap: '0.75rem'
+            width: '2.5rem',
+            height: '2.5rem',
+            borderRadius: '50%',
+            border: '2px solid var(--primary)',
+            overflow: 'hidden'
           }}>
-            {(['home', 'log', 'stats'] as const).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={activeTab === tab ? 'btn-primary' : ''}
-                style={activeTab === tab ? {
-                  padding: '1rem'
-                } : {
-                  padding: '1rem',
-                  borderRadius: '20px',
-                  border: '3px solid var(--ink)',
-                  background: 'transparent',
-                  color: 'var(--ink)',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  cursor: 'pointer'
-                }}
-              >
-                {tab === 'home' && '🏠 Home'}
-                {tab === 'log' && '➕ Add'}
-                {tab === 'stats' && '📊 Stats'}
-              </button>
-            ))}
+            <img src="/hope.jpg" alt="Hope" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-        </nav>
+          <h1 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--ink)' }}>
+            Hope&apos;s Walks
+          </h1>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {user.user_metadata.avatar_url && (
+            <img
+              src={user.user_metadata.avatar_url}
+              alt="User"
+              style={{
+                width: '1.75rem',
+                height: '1.75rem',
+                borderRadius: '50%',
+                border: '1px solid var(--border)'
+              }}
+            />
+          )}
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            style={{
+              width: '2rem',
+              height: '2rem',
+              borderRadius: '50%',
+              border: '1px solid var(--border)',
+              background: 'transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1rem'
+            }}
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
+        </div>
+      </header>
+
+      {/* Streak */}
+      <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+        <div className="streak-badge">
+          <span>🔥</span>
+          <span>{walkStreak} day{walkStreak !== 1 ? 's' : ''} walking streak</span>
+        </div>
       </div>
 
-      {showModal && (
-        <LogModal
-          type={showModal}
-          onClose={() => setShowModal(null)}
-          onSubmit={addLog}
+      {/* Calendar */}
+      <CalendarView
+        currentMonth={currentMonth}
+        setCurrentMonth={setCurrentMonth}
+        logs={logs}
+        onDayClick={handleDayClick}
+      />
+
+      {/* Day Modal */}
+      {showModal && selectedDay && (
+        <DayModal
+          date={selectedDay}
+          logs={logs}
+          onClose={() => setShowModal(false)}
+          onSave={saveDayLog}
         />
       )}
     </div>
   );
 }
 
-function HomeTab({ logs, streakData }: {
+function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
+  currentMonth: Date,
+  setCurrentMonth: (date: Date) => void,
   logs: HopeLog[],
-  streakData: { walkStreak: number, maxWalkStreak: number, cleanStreak: number, maxCleanStreak: number }
+  onDayClick: (date: Date) => void
 }) {
-  const todayLogs = logs.filter(l =>
-    new Date(l.created_at).toDateString() === new Date().toDateString()
-  );
-  const todayWalks = todayLogs.filter(l => l.type === 'walk').length;
-  const todayAccidents = todayLogs.filter(l => l.type === 'accident').length;
+  const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+  const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+  const startDate = new Date(monthStart);
+  startDate.setDate(startDate.getDate() - startDate.getDay());
+  const endDate = new Date(monthEnd);
+  endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      {/* Streak Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-        <div className="card-primary slide-in" style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
-          <div style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-            {streakData.walkStreak}
-          </div>
-          <div style={{ fontSize: '1rem', fontWeight: 700, opacity: 0.9 }}>
-            Walk Streak 🔥
-          </div>
-          <div style={{ fontSize: '0.875rem', fontWeight: 600, opacity: 0.7, marginTop: '0.25rem' }}>
-            Best: {streakData.maxWalkStreak}
-          </div>
-        </div>
-        <div className="card-accent slide-in delay-1" style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
-          <div style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-            {streakData.cleanStreak}
-          </div>
-          <div style={{ fontSize: '1rem', fontWeight: 700, opacity: 0.9 }}>
-            Clean Streak ⭐
-          </div>
-          <div style={{ fontSize: '0.875rem', fontWeight: 600, opacity: 0.7, marginTop: '0.25rem' }}>
-            Best: {streakData.maxCleanStreak}
-          </div>
-        </div>
-      </div>
+  const days = [];
+  const current = new Date(startDate);
+  while (current <= endDate) {
+    days.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
 
-      {/* Today Stats */}
-      <div className="card slide-in delay-2">
-        <h2 style={{
-          fontFamily: 'var(--font-bubblegum)',
-          fontSize: '2rem',
-          color: 'var(--ink)',
-          marginBottom: '1.5rem'
-        }}>
-          Today&apos;s Adventure
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div className="card-primary" style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🦴</div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-              {todayWalks}
-            </div>
-            <div style={{ fontSize: '1rem', fontWeight: 700, opacity: 0.9 }}>
-              Walks
-            </div>
-          </div>
-          <div className={todayAccidents === 0 ? 'card-blue' : 'card-accent'}
-            style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>
-              {todayAccidents === 0 ? '🎉' : '⚠️'}
-            </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-              {todayAccidents}
-            </div>
-            <div style={{ fontSize: '1rem', fontWeight: 700, opacity: 0.9 }}>
-              Oopsies
-            </div>
-          </div>
-        </div>
-      </div>
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-      {/* Recent Activity */}
-      {todayLogs.length > 0 ? (
-        <div className="card slide-in delay-3">
-          <h3 style={{
-            fontFamily: 'var(--font-bubblegum)',
-            fontSize: '1.5rem',
-            color: 'var(--ink)',
-            marginBottom: '1rem'
-          }}>
-            What We Did
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {todayLogs.slice(0, 5).map(log => (
-              <div
-                key={log.id}
-                style={{
-                  padding: '1rem',
-                  borderRadius: '16px',
-                  background: log.type === 'walk' ? 'oklch(0.62 0.18 145 / 0.15)' : 'oklch(0.70 0.21 38 / 0.15)',
-                  border: '3px solid',
-                  borderColor: log.type === 'walk' ? 'var(--primary)' : 'var(--accent)'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: log.type === 'walk' && (log.pooped || log.peed) ? '0.5rem' : 0 }}>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-                    {log.type === 'walk' ? '🦴 Walk' : `⚠️ ${log.subtype === 'pee' ? 'Pee' : 'Poop'} Inside`}
-                  </span>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--muted)' }}>
-                    {new Date(log.created_at).toLocaleTimeString('en-US', {
-                      hour: 'numeric',
-                      minute: '2-digit'
-                    })}
-                  </span>
-                </div>
-                {log.type === 'walk' && (log.pooped || log.peed) && (
-                  <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 600 }}>
-                    {log.pooped && <span style={{
-                      padding: '0.25rem 0.75rem',
-                      borderRadius: '100px',
-                      background: 'var(--primary)',
-                      color: 'white'
-                    }}>💩 Pooped</span>}
-                    {log.peed && <span style={{
-                      padding: '0.25rem 0.75rem',
-                      borderRadius: '100px',
-                      background: 'var(--primary)',
-                      color: 'white'
-                    }}>💧 Peed</span>}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="card slide-in delay-3" style={{
-          textAlign: 'center',
-          padding: '3rem 2rem'
-        }}>
-          <div style={{
-            width: '8rem',
-            height: '8rem',
-            borderRadius: '50%',
-            border: '5px solid var(--accent)',
-            overflow: 'hidden',
-            margin: '0 auto 1.5rem',
-            boxShadow: 'var(--shadow-lg)'
-          }}>
-            <img src="/hope.jpg" alt="Hope" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <h3 style={{
-            fontFamily: 'var(--font-bubblegum)',
-            fontSize: '1.75rem',
-            color: 'var(--ink)',
-            marginBottom: '0.5rem'
-          }}>
-            Ready for Adventure!
-          </h3>
-          <p style={{ color: 'var(--muted)', fontSize: '1.125rem', fontWeight: 600 }}>
-            Let&apos;s take Hope outside! 🐕
-          </p>
-        </div>
-      )}
-    </div>
-  );
-}
+  function getDayStatus(date: Date) {
+    const dateStr = date.toDateString();
+    const dayLog = logs.find(l =>
+      l.type === 'walk' && new Date(l.created_at).toDateString() === dateStr
+    );
 
-function LogTab({ onShowModal }: { onShowModal: (type: 'walk' | 'accident') => void }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-        <h2 style={{
-          fontFamily: 'var(--font-bubblegum)',
-          fontSize: '2.5rem',
-          color: 'var(--ink)',
-          marginBottom: '0.5rem'
-        }}>
-          What Happened?
-        </h2>
-        <p style={{ color: 'var(--muted)', fontSize: '1.125rem', fontWeight: 600 }}>
-          Tell us about Hope&apos;s day!
-        </p>
-      </div>
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+    const isPast = checkDate < today;
+    const isToday = checkDate.getTime() === today.getTime();
+    const isFuture = checkDate > today;
 
-      <button
-        onClick={() => onShowModal('walk')}
-        className="btn-primary slide-in"
-        style={{
-          width: '100%',
-          padding: '2.5rem 2rem',
-          fontSize: '1.75rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '1rem'
-        }}
-      >
-        <span style={{ fontSize: '4rem' }}>🦴</span>
-        <span>Walk Time!</span>
-      </button>
-
-      <button
-        onClick={() => onShowModal('accident')}
-        className="btn-secondary slide-in delay-1"
-        style={{
-          width: '100%',
-          padding: '2.5rem 2rem',
-          fontSize: '1.75rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '1rem'
-        }}
-      >
-        <span style={{ fontSize: '4rem' }}>⚠️</span>
-        <span>Had an Oopsie</span>
-      </button>
-    </div>
-  );
-}
-
-function StatsTab({ logs }: { logs: HopeLog[] }) {
-  const dailyData = useMemo(() => {
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toDateString();
-      const dayLogs = logs.filter(l => new Date(l.created_at).toDateString() === dateStr);
-      days.push({
-        day: date.toLocaleDateString('en-US', { weekday: 'short' }),
-        walks: dayLogs.filter(l => l.type === 'walk').length,
-        accidents: dayLogs.filter(l => l.type === 'accident').length
-      });
-    }
-    return days;
-  }, [logs]);
-
-  return (
-    <div className="card slide-in">
-      <h2 style={{
-        fontFamily: 'var(--font-bubblegum)',
-        fontSize: '2rem',
-        color: 'var(--ink)',
-        marginBottom: '2rem'
-      }}>
-        This Week&apos;s Stats
-      </h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {dailyData.map((day, i) => (
-          <div
-            key={i}
-            className="slide-in"
-            style={{
-              animationDelay: `${i * 0.1}s`,
-              opacity: 0,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem'
-            }}
-          >
-            <div style={{
-              width: '4rem',
-              fontWeight: 700,
-              color: 'var(--ink)',
-              fontSize: '1rem'
-            }}>
-              {day.day}
-            </div>
-            <div style={{
-              flex: 1,
-              padding: '1.25rem',
-              borderRadius: '16px',
-              background: day.walks > 0 && day.accidents === 0
-                ? 'var(--primary)'
-                : day.accidents > 0 && day.walks === 0
-                  ? 'var(--accent)'
-                  : day.walks > 0
-                    ? 'var(--purple)'
-                    : 'var(--surface)',
-              color: day.walks > 0 || day.accidents > 0 ? 'white' : 'var(--muted)',
-              border: '3px solid',
-              borderColor: day.walks > 0 || day.accidents > 0 ? 'oklch(0.25 0.015 279 / 0.2)' : 'var(--ink)',
-              fontWeight: 700,
-              fontSize: '1.125rem',
-              textAlign: 'center'
-            }}
-          >
-            {day.walks > 0 && `🦴 ${day.walks}`}
-            {day.walks > 0 && day.accidents > 0 && ' · '}
-            {day.accidents > 0 && `⚠️ ${day.accidents}`}
-            {day.walks === 0 && day.accidents === 0 && '—'}
-          </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function LogModal({ type, onClose, onSubmit }: {
-  type: 'walk' | 'accident',
-  onClose: () => void,
-  onSubmit: (data: Partial<HopeLog>) => void
-}) {
-  const [subtype, setSubtype] = useState<'pee' | 'poop'>('pee');
-  const [duration, setDuration] = useState('');
-  const [pooped, setPooped] = useState(false);
-  const [peed, setPeed] = useState(false);
-
-  function handleSubmit() {
-    const logData: Partial<HopeLog> = {
-      type,
-      created_at: new Date().toISOString()
+    return {
+      dayLog,
+      isPast,
+      isToday,
+      isFuture,
+      isMissed: isPast && !dayLog
     };
-    if (type === 'accident') {
-      logData.subtype = subtype;
-    } else {
-      // For walks
-      if (duration) {
-        logData.duration = parseInt(duration);
-      }
-      logData.pooped = pooped;
-      logData.peed = peed;
-    }
-    onSubmit(logData);
+  }
+
+  function prevMonth() {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+  }
+
+  function nextMonth() {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
   }
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'oklch(0.25 0.015 279 / 0.7)',
+    <div className="card">
+      {/* Month Header */}
+      <div style={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-        zIndex: 100
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="card pop-in"
-        style={{
-          maxWidth: '500px',
-          width: '100%',
-          padding: '2rem'
-        }}
-      >
-        <h3 style={{
-          fontFamily: 'var(--font-bubblegum)',
-          fontSize: '2rem',
-          color: 'var(--ink)',
-          marginBottom: '2rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem'
-        }}>
-          <span style={{ fontSize: '2.5rem' }}>
-            {type === 'walk' ? '🦴' : '⚠️'}
-          </span>
-          {type === 'walk' ? 'Walk Time!' : 'Oopsie Happened'}
-        </h3>
+        justifyContent: 'space-between',
+        marginBottom: '1.5rem'
+      }}>
+        <button onClick={prevMonth} className="btn btn-secondary" style={{ padding: '0.5rem 0.75rem' }}>
+          ←
+        </button>
+        <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--ink)' }}>
+          {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+        </h2>
+        <button onClick={nextMonth} className="btn btn-secondary" style={{ padding: '0.5rem 0.75rem' }}>
+          →
+        </button>
+      </div>
 
-        {type === 'accident' && (
-          <div style={{ marginBottom: '2rem' }}>
-            <label style={{
-              display: 'block',
-              fontWeight: 700,
-              fontSize: '1.125rem',
-              color: 'var(--ink)',
-              marginBottom: '1rem'
-            }}>
-              What kind?
-            </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              {(['pee', 'poop'] as const).map(s => (
-                <button
-                  key={s}
-                  onClick={() => setSubtype(s)}
-                  className={subtype === s ? 'btn-secondary' : ''}
-                  style={subtype === s ? {
-                    padding: '1.5rem'
-                  } : {
-                    padding: '1.5rem',
-                    borderRadius: '20px',
-                    border: '3px solid var(--ink)',
-                    background: 'transparent',
-                    color: 'var(--ink)',
-                    fontWeight: 700,
-                    fontSize: '1.125rem',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {s === 'pee' ? '💧 Pee' : '💩 Poop'}
-                </button>
-              ))}
-            </div>
+      {/* Weekday Headers */}
+      <div className="calendar-grid" style={{ marginBottom: '0.25rem' }}>
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+          <div key={day} style={{
+            textAlign: 'center',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            color: 'var(--muted)',
+            padding: '0.5rem 0'
+          }}>
+            {day}
           </div>
-        )}
+        ))}
+      </div>
 
-        {type === 'walk' && (
-          <>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{
-                display: 'block',
-                fontWeight: 700,
-                fontSize: '1.125rem',
-                color: 'var(--ink)',
-                marginBottom: '1rem'
-              }}>
-                What did Hope do? (check all)
-              </label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <button
-                  onClick={() => setPooped(!pooped)}
-                  style={{
-                    padding: '1rem 1.5rem',
-                    borderRadius: '16px',
-                    border: '3px solid',
-                    borderColor: pooped ? 'var(--primary)' : 'var(--ink)',
-                    background: pooped ? 'var(--primary)' : 'transparent',
-                    color: pooped ? 'white' : 'var(--ink)',
-                    fontWeight: 700,
-                    fontSize: '1.125rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  <span>💩 Pooped outside</span>
-                  <span style={{ fontSize: '1.5rem' }}>{pooped ? '✓' : '○'}</span>
-                </button>
-                <button
-                  onClick={() => setPeed(!peed)}
-                  style={{
-                    padding: '1rem 1.5rem',
-                    borderRadius: '16px',
-                    border: '3px solid',
-                    borderColor: peed ? 'var(--primary)' : 'var(--ink)',
-                    background: peed ? 'var(--primary)' : 'transparent',
-                    color: peed ? 'white' : 'var(--ink)',
-                    fontWeight: 700,
-                    fontSize: '1.125rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  <span>💧 Peed outside</span>
-                  <span style={{ fontSize: '1.5rem' }}>{peed ? '✓' : '○'}</span>
-                </button>
+      {/* Calendar Grid */}
+      <div className="calendar-grid">
+        {days.map(date => {
+          const status = getDayStatus(date);
+          const isOtherMonth = date.getMonth() !== currentMonth.getMonth();
+
+          return (
+            <div
+              key={date.toISOString()}
+              className={`calendar-day ${status.isToday ? 'today' : ''} ${status.isFuture || isOtherMonth ? 'disabled' : ''} ${isOtherMonth ? 'other-month' : ''}`}
+              onClick={() => !status.isFuture && !isOtherMonth && onDayClick(date)}
+            >
+              <div className="day-number" style={{ color: isOtherMonth ? 'var(--light-text)' : 'var(--ink)' }}>
+                {date.getDate()}
+              </div>
+              <div className="day-indicators">
+                {!isOtherMonth && !status.isFuture && (
+                  <>
+                    {status.dayLog && (
+                      <>
+                        {status.dayLog.pooped && <span>💩</span>}
+                        {status.dayLog.peed && <span>💧</span>}
+                      </>
+                    )}
+                    {status.isMissed && <span style={{ color: 'var(--error)', fontSize: '1.25rem' }}>✕</span>}
+                  </>
+                )}
               </div>
             </div>
-            <div style={{ marginBottom: '2rem' }}>
-              <label style={{
-                display: 'block',
-                fontWeight: 700,
-                fontSize: '1.125rem',
-                color: 'var(--ink)',
-                marginBottom: '1rem'
-              }}>
-                How long? (minutes, optional)
-              </label>
-              <input
-                type="number"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                placeholder="Like 15"
-                style={{
-                  width: '100%',
-                  padding: '1rem 1.5rem',
-                  borderRadius: '16px',
-                  border: '3px solid var(--ink)',
-                  background: 'var(--surface)',
-                  color: 'var(--ink)',
-                  fontWeight: 700,
-                  fontSize: '1.125rem',
-                  fontFamily: 'inherit'
-                }}
-              />
-            </div>
-          </>
-        )}
+          );
+        })}
+      </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      {/* Legend */}
+      <div style={{
+        marginTop: '1.5rem',
+        paddingTop: '1.5rem',
+        borderTop: '1px solid var(--border)',
+        display: 'flex',
+        gap: '1rem',
+        flexWrap: 'wrap',
+        fontSize: '0.75rem',
+        color: 'var(--muted)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <span>💩</span> Pooped
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <span>💧</span> Peed
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <span style={{ color: 'var(--error)' }}>✕</span> Missed
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DayModal({ date, logs, onClose, onSave }: {
+  date: Date,
+  logs: HopeLog[],
+  onClose: () => void,
+  onSave: (pooped: boolean, peed: boolean) => void
+}) {
+  const dateStr = date.toDateString();
+  const existingLog = logs.find(l =>
+    l.type === 'walk' && new Date(l.created_at).toDateString() === dateStr
+  );
+
+  const [pooped, setPooped] = useState(existingLog?.pooped ?? false);
+  const [peed, setPeed] = useState(existingLog?.peed ?? false);
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <h3 style={{
+          fontSize: '1.25rem',
+          fontWeight: 600,
+          marginBottom: '1.5rem',
+          color: 'var(--ink)'
+        }}>
+          {date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+        </h3>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
           <button
-            onClick={onClose}
-            style={{
-              padding: '1rem',
-              borderRadius: '20px',
-              border: '3px solid var(--ink)',
-              background: 'transparent',
-              color: 'var(--ink)',
-              fontWeight: 700,
-              fontSize: '1.125rem',
-              cursor: 'pointer'
-            }}
+            onClick={() => setPooped(!pooped)}
+            className={`toggle-btn ${pooped ? 'active' : ''}`}
           >
-            Nevermind
+            <span>💩 Pooped outside</span>
+            <span style={{ fontSize: '1.25rem' }}>{pooped ? '✓' : '○'}</span>
           </button>
           <button
-            onClick={handleSubmit}
-            className="btn-primary"
-            style={{ padding: '1rem', fontSize: '1.125rem' }}
+            onClick={() => setPeed(!peed)}
+            className={`toggle-btn ${peed ? 'active' : ''}`}
           >
-            ✓ Save It!
+            <span>💧 Peed outside</span>
+            <span style={{ fontSize: '1.25rem' }}>{peed ? '✓' : '○'}</span>
+          </button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <button onClick={onClose} className="btn btn-secondary">
+            Cancel
+          </button>
+          <button onClick={() => onSave(pooped, peed)} className="btn btn-primary">
+            Save
           </button>
         </div>
       </div>
