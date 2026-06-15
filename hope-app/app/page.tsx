@@ -548,12 +548,16 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
               <div className="day-indicators">
                 {!isOtherMonth && !status.isFuture && (
                   <>
-                    {Array.from({ length: Math.min(status.poopCount, 3) }).map((_, i) => (
-                      <span key={`poop-${i}`} style={{ fontSize: '0.85rem', lineHeight: 1 }}>💩</span>
-                    ))}
-                    {Array.from({ length: Math.min(status.peeCount, 3) }).map((_, i) => (
-                      <span key={`pee-${i}`} style={{ fontSize: '0.85rem', lineHeight: 1 }}>💧</span>
-                    ))}
+                    {status.poopCount > 0 && (
+                      <span style={{ fontSize: '0.85rem', lineHeight: 1, whiteSpace: 'nowrap' }}>
+                        💩×{status.poopCount}
+                      </span>
+                    )}
+                    {status.peeCount > 0 && (
+                      <span style={{ fontSize: '0.85rem', lineHeight: 1, whiteSpace: 'nowrap' }}>
+                        💧×{status.peeCount}
+                      </span>
+                    )}
                     {status.isMissed && <span style={{ color: 'var(--error)', fontSize: '0.875rem' }}>✕</span>}
                   </>
                 )}
