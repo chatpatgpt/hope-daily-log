@@ -213,10 +213,11 @@ export default function Home() {
 
       {/* Running dog */}
       <div className="dog-track">
-        <div className="dog-slider">
-          <div className="dog-emoji">
+        <div className="dog-runner">
+          <div className="dog-body">
             🐕
           </div>
+          <div className="dog-shadow"></div>
         </div>
       </div>
 

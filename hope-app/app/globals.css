@@ -242,47 +242,98 @@ body {
 /* Dog running animation */
 .dog-track {
   position: relative;
-  height: 60px;
+  height: 70px;
   margin-bottom: 1.5rem;
   overflow: hidden;
 }
 
-.dog-slider {
+.dog-runner {
   position: absolute;
-  animation: runAcross 6s linear infinite alternate;
+  animation: runHorizontal 5s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+  bottom: 10px;
 }
 
-.dog-emoji {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.dog-body {
+  position: relative;
   font-size: 48px;
   filter: brightness(1.8) saturate(0);
-  transform: scaleX(1);
-  animation: flipDog 6s linear infinite alternate;
+  animation:
+    gallop 0.4s cubic-bezier(0.33, 0, 0.67, 1) infinite,
+    flipDirection 5s step-end infinite alternate,
+    squashStretch 0.4s cubic-bezier(0.33, 0, 0.67, 1) infinite;
+  transform-origin: bottom center;
 }
 
-@keyframes runAcross {
+.dog-shadow {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 8px;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: shadowPulse 0.4s cubic-bezier(0.33, 0, 0.67, 1) infinite;
+}
+
+/* Horizontal movement with acceleration/deceleration */
+@keyframes runHorizontal {
   0% {
     left: -60px;
   }
   100% {
-    left: calc(100% - 60px);
+    left: calc(100% - 20px);
   }
 }
 
-@keyframes flipDog {
-  0% {
-    transform: scaleX(1);
+/* Vertical galloping bob */
+@keyframes gallop {
+  0%, 100% {
+    transform: translateY(0);
   }
   50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Direction flip */
+@keyframes flipDirection {
+  0%, 49.9% {
     transform: scaleX(1);
   }
-  50.01% {
+  50%, 100% {
     transform: scaleX(-1);
   }
+}
+
+/* Squash and stretch for weight */
+@keyframes squashStretch {
+  0% {
+    transform: scaleY(1) scaleX(1);
+  }
+  25% {
+    transform: scaleY(1.05) scaleX(0.95);
+  }
+  50% {
+    transform: scaleY(0.95) scaleX(1.05);
+  }
+  75% {
+    transform: scaleY(1.05) scaleX(0.95);
+  }
   100% {
-    transform: scaleX(-1);
+    transform: scaleY(1) scaleX(1);
+  }
+}
+
+/* Shadow scales inversely to body height */
+@keyframes shadowPulse {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateX(-50%) scale(0.7);
+    opacity: 0.15;
   }
 }
 
