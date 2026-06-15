@@ -13,6 +13,8 @@ CREATE TABLE hope_logs (
   user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
   user_email text,
   duration integer,
+  pooped boolean DEFAULT false,
+  peed boolean DEFAULT false,
   created_at timestamptz DEFAULT now()
 );
 

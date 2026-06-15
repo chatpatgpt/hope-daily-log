@@ -103,13 +103,15 @@ export default function Home() {
     try {
       if (existingLog) {
         // Update existing walk
-        await supabase
+        const { error } = await supabase
           .from('hope_logs')
           .update({ pooped, peed })
           .eq('id', existingLog.id);
+
+        if (error) throw error;
       } else {
         // Create new walk
-        await supabase.from('hope_logs').insert([{
+        const { error } = await supabase.from('hope_logs').insert([{
           type: 'walk',
           pooped,
           peed,
@@ -118,9 +120,15 @@ export default function Home() {
           person: user.user_metadata.full_name || user.email?.split('@')[0] || 'User',
           created_at: selectedDay.toISOString()
         }]);
+
+        if (error) throw error;
       }
+
+      // Refresh logs immediately
+      await fetchLogs();
       setShowModal(false);
     } catch (err) {
+      console.error('Save error:', err);
       alert('Could not save: ' + (err as Error).message);
     }
   }
