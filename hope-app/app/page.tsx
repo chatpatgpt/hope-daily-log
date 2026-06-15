@@ -162,6 +162,7 @@ export default function Home() {
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [locationError, setLocationError] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  const [showDebug, setShowDebug] = useState(true);
 
   useEffect(() => {
     if (!hasWalkedToday && !weather && !weatherLoading && !locationError) {
@@ -376,21 +377,49 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Debug Panel */}
-      {debugInfo.length > 0 && (
+      {/* Debug Panel - Persistent */}
+      {debugInfo.length > 0 && showDebug && (
         <div style={{
           margin: '0 auto 1rem',
           maxWidth: '600px',
           padding: '1rem',
-          background: '#f0f0f0',
-          border: '2px solid #333',
+          background: '#fff3cd',
+          border: '2px solid #856404',
           borderRadius: '8px',
-          fontSize: '0.75rem',
-          fontFamily: 'monospace'
+          fontSize: '0.875rem',
+          fontFamily: 'monospace',
+          position: 'relative'
         }}>
-          <strong>Debug Info:</strong>
+          <button
+            onClick={() => setShowDebug(false)}
+            style={{
+              position: 'absolute',
+              top: '0.5rem',
+              right: '0.5rem',
+              background: '#856404',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '0.25rem 0.5rem',
+              cursor: 'pointer',
+              fontSize: '0.75rem',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+          <strong style={{ display: 'block', marginBottom: '0.5rem', fontSize: '1rem' }}>
+            Weather Debug:
+          </strong>
           {debugInfo.map((info, i) => (
-            <div key={i} style={{ marginTop: '0.25rem' }}>{info}</div>
+            <div key={i} style={{
+              marginTop: '0.5rem',
+              padding: '0.25rem',
+              background: i === debugInfo.length - 1 ? '#fffaeb' : 'transparent',
+              fontWeight: i === debugInfo.length - 1 ? 'bold' : 'normal'
+            }}>
+              {info}
+            </div>
           ))}
         </div>
       )}
