@@ -239,29 +239,68 @@ body {
   border-color: var(--muted);
 }
 
-/* Dog running animation */
+/* Dog running animation - Pixar style */
 .dog-track {
   position: relative;
-  height: 70px;
+  height: 90px;
   margin-bottom: 1.5rem;
   overflow: hidden;
 }
 
 .dog-runner {
   position: absolute;
-  animation: runHorizontal 5s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+  animation: pixarRun 6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
   bottom: 10px;
 }
 
-.dog-body {
-  position: relative;
-  font-size: 48px;
-  filter: brightness(1.8) saturate(0);
+.dog-svg {
+  width: 100px;
+  height: 80px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
   animation:
-    gallop 0.4s cubic-bezier(0.33, 0, 0.67, 1) infinite,
-    flipDirection 5s step-end infinite alternate,
-    squashStretch 0.4s cubic-bezier(0.33, 0, 0.67, 1) infinite;
-  transform-origin: bottom center;
+    dogBounce 0.3s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite,
+    dogSquash 0.3s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite;
+  transform-origin: 50% 80%;
+}
+
+.dog-body-part {
+  animation: bodySquash 0.3s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite;
+  transform-origin: center;
+}
+
+.dog-head {
+  animation: headBob 0.3s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite;
+  transform-origin: 72px 45px;
+}
+
+.dog-ear {
+  animation: earFlop 0.3s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite;
+  transform-origin: 68px 32px;
+}
+
+.dog-tail {
+  animation: tailWag 0.25s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite;
+  transform-origin: 30px 42px;
+}
+
+.leg-front-1 {
+  animation: legCycleFront1 0.3s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite;
+  transform-origin: 62.5px 55px;
+}
+
+.leg-front-2 {
+  animation: legCycleFront2 0.3s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite;
+  transform-origin: 70.5px 55px;
+}
+
+.leg-back-1 {
+  animation: legCycleBack1 0.3s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite;
+  transform-origin: 37.5px 55px;
+}
+
+.leg-back-2 {
+  animation: legCycleBack2 0.3s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite;
+  transform-origin: 45.5px 55px;
 }
 
 .dog-shadow {
@@ -269,70 +308,178 @@ body {
   bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
-  width: 40px;
-  height: 8px;
-  background: radial-gradient(ellipse, rgba(0,0,0,0.2) 0%, transparent 70%);
+  width: 60px;
+  height: 10px;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.25) 0%, transparent 70%);
   border-radius: 50%;
-  animation: shadowPulse 0.4s cubic-bezier(0.33, 0, 0.67, 1) infinite;
+  animation: shadowPixar 0.3s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite;
 }
 
-/* Horizontal movement with acceleration/deceleration */
-@keyframes runHorizontal {
+/* Pixar-style run with anticipation, overshoot, and settle */
+@keyframes pixarRun {
   0% {
-    left: -60px;
+    left: -120px;
+    transform: scaleX(1) translateX(0);
+  }
+  2% {
+    transform: scaleX(0.9) translateX(-10px);
+  }
+  5% {
+    transform: scaleX(1.1) translateX(5px);
+  }
+  48% {
+    left: calc(100% - 20px);
+    transform: scaleX(1) translateX(0);
+  }
+  50% {
+    left: calc(100% - 20px);
+    transform: scaleX(1) translateX(15px);
+  }
+  52% {
+    left: calc(100% - 20px);
+    transform: scaleX(1) translateX(-5px);
+  }
+  54% {
+    left: calc(100% - 20px);
+    transform: scaleX(-0.9) translateX(10px);
+  }
+  57% {
+    left: calc(100% - 20px);
+    transform: scaleX(-1.1) translateX(-5px);
+  }
+  98% {
+    left: -120px;
+    transform: scaleX(-1) translateX(0);
   }
   100% {
-    left: calc(100% - 20px);
+    left: -120px;
+    transform: scaleX(-1) translateX(0);
   }
 }
 
-/* Vertical galloping bob */
-@keyframes gallop {
+/* Bouncing motion */
+@keyframes dogBounce {
   0%, 100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-12px);
+    transform: translateY(-15px);
   }
 }
 
-/* Direction flip */
-@keyframes flipDirection {
-  0%, 49.9% {
-    transform: scaleX(1);
-  }
-  50%, 100% {
-    transform: scaleX(-1);
-  }
-}
-
-/* Squash and stretch for weight */
-@keyframes squashStretch {
-  0% {
+/* Squash and stretch */
+@keyframes dogSquash {
+  0%, 100% {
     transform: scaleY(1) scaleX(1);
   }
   25% {
-    transform: scaleY(1.05) scaleX(0.95);
+    transform: scaleY(1.12) scaleX(0.88);
   }
   50% {
-    transform: scaleY(0.95) scaleX(1.05);
+    transform: scaleY(0.88) scaleX(1.12);
   }
   75% {
-    transform: scaleY(1.05) scaleX(0.95);
-  }
-  100% {
-    transform: scaleY(1) scaleX(1);
+    transform: scaleY(1.12) scaleX(0.88);
   }
 }
 
-/* Shadow scales inversely to body height */
-@keyframes shadowPulse {
+/* Body breathing */
+@keyframes bodySquash {
   0%, 100% {
-    transform: translateX(-50%) scale(1);
-    opacity: 0.3;
+    transform: scaleX(1);
   }
   50% {
-    transform: translateX(-50%) scale(0.7);
+    transform: scaleX(1.08);
+  }
+}
+
+/* Head bob with anticipation */
+@keyframes headBob {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-3px) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-1px) rotate(2deg);
+  }
+  75% {
+    transform: translateY(-3px) rotate(-2deg);
+  }
+}
+
+/* Ear flop with delay */
+@keyframes earFlop {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-15deg);
+  }
+  60% {
+    transform: rotate(8deg);
+  }
+}
+
+/* Energetic tail wag */
+@keyframes tailWag {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(20deg);
+  }
+  75% {
+    transform: rotate(-20deg);
+  }
+}
+
+/* Leg cycles - alternating */
+@keyframes legCycleFront1 {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-35deg);
+  }
+}
+
+@keyframes legCycleFront2 {
+  0%, 100% {
+    transform: rotate(-35deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes legCycleBack1 {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(35deg);
+  }
+}
+
+@keyframes legCycleBack2 {
+  0%, 100% {
+    transform: rotate(35deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+}
+
+/* Shadow with Pixar dynamics */
+@keyframes shadowPixar {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translateX(-50%) scale(0.6);
     opacity: 0.15;
   }
 }

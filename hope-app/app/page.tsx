@@ -214,9 +214,36 @@ export default function Home() {
       {/* Running dog */}
       <div className="dog-track">
         <div className="dog-runner">
-          <div className="dog-body">
-            🐕
-          </div>
+          <svg className="dog-svg" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
+            {/* Body */}
+            <ellipse className="dog-body-part" cx="50" cy="45" rx="22" ry="16" fill="white" />
+
+            {/* Head */}
+            <g className="dog-head">
+              <circle cx="72" cy="38" r="14" fill="white" />
+              {/* Snout */}
+              <ellipse cx="82" cy="40" rx="6" ry="5" fill="white" />
+              {/* Nose */}
+              <circle cx="85" cy="39" r="2" fill="#333" />
+              {/* Eye */}
+              <circle cx="75" cy="35" r="2" fill="#333" />
+              {/* Ear */}
+              <ellipse className="dog-ear" cx="68" cy="28" rx="5" ry="8" fill="white" />
+            </g>
+
+            {/* Tail */}
+            <path className="dog-tail" d="M 30 42 Q 20 35, 15 30" stroke="white" strokeWidth="6" fill="none" strokeLinecap="round" />
+
+            {/* Legs */}
+            <g className="dog-legs">
+              {/* Front legs */}
+              <rect className="leg-front-1" x="60" y="55" width="5" height="18" rx="2.5" fill="white" />
+              <rect className="leg-front-2" x="68" y="55" width="5" height="18" rx="2.5" fill="white" />
+              {/* Back legs */}
+              <rect className="leg-back-1" x="35" y="55" width="5" height="18" rx="2.5" fill="white" />
+              <rect className="leg-back-2" x="43" y="55" width="5" height="18" rx="2.5" fill="white" />
+            </g>
+          </svg>
           <div className="dog-shadow"></div>
         </div>
       </div>
