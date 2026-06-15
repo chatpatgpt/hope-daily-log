@@ -349,26 +349,68 @@ export default function Home() {
       </div>
 
       {/* Weather Banner - only show if no walk today */}
-      {!hasWalkedToday && weather && (
-        <div
-          className="weather-banner"
-          style={{
-            background: getWeatherRecommendation(weather.temp, weather.condition).gradient
-          }}
-        >
-          <div className="weather-info">
-            <span className="weather-emoji">
-              {getWeatherRecommendation(weather.temp, weather.condition).emoji}
-            </span>
-            <div className="weather-details">
-              <span className="weather-temp">{weather.temp}°F</span>
-              <span className="weather-condition">{weather.condition}</span>
+      {!hasWalkedToday && (
+        <>
+          {weatherLoading && (
+            <div className="weather-banner" style={{ background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' }}>
+              <div className="weather-info">
+                <span className="weather-emoji">🌤️</span>
+                <div className="weather-details">
+                  <span className="weather-temp">Loading...</span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="weather-recommendation">
-            {getWeatherRecommendation(weather.temp, weather.condition).text}
-          </div>
-        </div>
+          )}
+
+          {weather && (
+            <div
+              className="weather-banner"
+              style={{
+                background: getWeatherRecommendation(weather.temp, weather.condition).gradient
+              }}
+            >
+              <div className="weather-info">
+                <span className="weather-emoji">
+                  {getWeatherRecommendation(weather.temp, weather.condition).emoji}
+                </span>
+                <div className="weather-details">
+                  <span className="weather-temp">{weather.temp}°F</span>
+                  <span className="weather-condition">{weather.condition}</span>
+                </div>
+              </div>
+              <div className="weather-recommendation">
+                {getWeatherRecommendation(weather.temp, weather.condition).text}
+              </div>
+            </div>
+          )}
+
+          {locationError && !weather && (
+            <div className="weather-banner" style={{ background: 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)' }}>
+              <div className="weather-info">
+                <span className="weather-emoji">⚠️</span>
+                <div className="weather-details">
+                  <span className="weather-temp">Weather unavailable</span>
+                  <span className="weather-condition" style={{ fontSize: '0.75rem' }}>Check console for errors</span>
+                </div>
+              </div>
+              <button
+                onClick={fetchWeather}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  color: 'white',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: 600
+                }}
+              >
+                Retry
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Contextual Dog */}
