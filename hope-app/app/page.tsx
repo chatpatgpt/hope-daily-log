@@ -148,6 +148,126 @@ export default function Home() {
     }
   }, [logs, walkStreak]);
 
+  const hasWalkedToday = useMemo(() => {
+    const today = new Date().toDateString();
+    return logs.some(l => l.type === 'walk' && new Date(l.created_at).toDateString() === today);
+  }, [logs]);
+
+  const [weather, setWeather] = useState<{
+    temp: number;
+    condition: string;
+    icon: string;
+    feelsLike: number;
+  } | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [locationError, setLocationError] = useState(false);
+
+  useEffect(() => {
+    if (!hasWalkedToday && !weather && !weatherLoading && !locationError) {
+      fetchWeather();
+    }
+  }, [hasWalkedToday, weather, weatherLoading, locationError]);
+
+  async function fetchWeather() {
+    setWeatherLoading(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          timeout: 10000,
+          maximumAge: 1800000 // 30 min cache
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || 'demo';
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=imperial&appid=${apiKey}`
+      );
+
+      if (!response.ok) throw new Error('Weather fetch failed');
+
+      const data = await response.json();
+      setWeather({
+        temp: Math.round(data.main.temp),
+        condition: data.weather[0].main,
+        icon: data.weather[0].icon,
+        feelsLike: Math.round(data.main.feels_like)
+      });
+      setLocationError(false);
+    } catch (err) {
+      console.error('Weather error:', err);
+      setLocationError(true);
+    } finally {
+      setWeatherLoading(false);
+    }
+  }
+
+  function getWeatherRecommendation(temp: number, condition: string): { emoji: string; text: string; gradient: string } {
+    const lowerCondition = condition.toLowerCase();
+
+    if (lowerCondition.includes('rain') || lowerCondition.includes('drizzle')) {
+      return {
+        emoji: '🌧️',
+        text: 'Rainy — Hope might be quick today',
+        gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      };
+    }
+
+    if (lowerCondition.includes('snow')) {
+      return {
+        emoji: '❄️',
+        text: 'Snowy — Bundle up for a short walk',
+        gradient: 'linear-gradient(135deg, #e0f7fa 0%, #80deea 100%)'
+      };
+    }
+
+    if (lowerCondition.includes('thunder') || lowerCondition.includes('storm')) {
+      return {
+        emoji: '⛈️',
+        text: 'Stormy — Maybe wait a bit',
+        gradient: 'linear-gradient(135deg, #434343 0%, #000000 100%)'
+      };
+    }
+
+    if (temp < 40) {
+      return {
+        emoji: '🥶',
+        text: 'Cold outside! Bundle up for a short walk',
+        gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
+      };
+    }
+
+    if (temp > 85) {
+      return {
+        emoji: '🥵',
+        text: 'Hot outside! Bring water for Hope',
+        gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+      };
+    }
+
+    if (temp >= 60 && temp <= 75 && (lowerCondition.includes('clear') || lowerCondition.includes('sun'))) {
+      return {
+        emoji: '☀️',
+        text: 'Perfect walking weather!',
+        gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
+      };
+    }
+
+    if (lowerCondition.includes('cloud')) {
+      return {
+        emoji: '☁️',
+        text: 'Cloudy but good for walking',
+        gradient: 'linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%)'
+      };
+    }
+
+    return {
+      emoji: '🌤️',
+      text: 'Good day for a walk!',
+      gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
+    };
+  }
+
   if (loading) {
     return (
       <div className={darkMode ? 'dark' : ''} style={{
@@ -227,6 +347,29 @@ export default function Home() {
           <span>{walkStreak} day{walkStreak !== 1 ? 's' : ''} walking streak</span>
         </div>
       </div>
+
+      {/* Weather Banner - only show if no walk today */}
+      {!hasWalkedToday && weather && (
+        <div
+          className="weather-banner"
+          style={{
+            background: getWeatherRecommendation(weather.temp, weather.condition).gradient
+          }}
+        >
+          <div className="weather-info">
+            <span className="weather-emoji">
+              {getWeatherRecommendation(weather.temp, weather.condition).emoji}
+            </span>
+            <div className="weather-details">
+              <span className="weather-temp">{weather.temp}°F</span>
+              <span className="weather-condition">{weather.condition}</span>
+            </div>
+          </div>
+          <div className="weather-recommendation">
+            {getWeatherRecommendation(weather.temp, weather.condition).text}
+          </div>
+        </div>
+      )}
 
       {/* Contextual Dog */}
       <div className="dog-track">
