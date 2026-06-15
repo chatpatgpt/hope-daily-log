@@ -165,10 +165,10 @@ export default function Home() {
   const [showDebug, setShowDebug] = useState(true);
 
   useEffect(() => {
-    if (!hasWalkedToday && !weather && !weatherLoading && !locationError) {
+    if (!weather && !weatherLoading && !locationError) {
       fetchWeather();
     }
-  }, [hasWalkedToday, weather, weatherLoading, locationError]);
+  }, [weather, weatherLoading, locationError]);
 
   async function fetchWeather() {
     const debug: string[] = [];
@@ -462,10 +462,9 @@ export default function Home() {
         </div>
       )}
 
-      {/* Weather Banner - only show if no walk today */}
-      {!hasWalkedToday && (
-        <>
-          {weatherLoading && (
+      {/* Weather Banner - always visible */}
+      <>
+        {weatherLoading && (
             <div className="weather-banner" style={{ background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' }}>
               <div className="weather-info">
                 <span className="weather-emoji">🌤️</span>
@@ -524,8 +523,7 @@ export default function Home() {
               </button>
             </div>
           )}
-        </>
-      )}
+      </>
 
       {/* Contextual Dog */}
       <div className="dog-track">
