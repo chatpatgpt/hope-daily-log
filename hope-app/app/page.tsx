@@ -387,7 +387,7 @@ export default function Home() {
       {/* Weather Banner - always visible */}
       <>
         {weatherLoading && (
-            <div className="weather-banner" style={{ background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' }}>
+            <div className="weather-banner">
               <div className="weather-info">
                 <span className="weather-emoji">🌤️</span>
                 <div className="weather-details">
@@ -398,12 +398,7 @@ export default function Home() {
           )}
 
           {weather && (
-            <div
-              className="weather-banner"
-              style={{
-                background: getWeatherRecommendation(weather.temp, weather.condition).gradient
-              }}
-            >
+            <div className="weather-banner">
               <div className="weather-info">
                 <span className="weather-emoji">
                   {getWeatherRecommendation(weather.temp, weather.condition).emoji}
@@ -420,25 +415,20 @@ export default function Home() {
           )}
 
           {locationError && !weather && (
-            <div className="weather-banner" style={{ background: 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)' }}>
+            <div className="weather-banner">
               <div className="weather-info">
                 <span className="weather-emoji">⚠️</span>
                 <div className="weather-details">
                   <span className="weather-temp">Weather unavailable</span>
-                  <span className="weather-condition" style={{ fontSize: '0.75rem' }}>Check console for errors</span>
+                  <span className="weather-condition">Location or network issue</span>
                 </div>
               </div>
               <button
                 onClick={fetchWeather}
+                className="btn btn-primary"
                 style={{
-                  background: 'rgba(255,255,255,0.2)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  color: 'white',
                   padding: '0.5rem 1rem',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: 600
+                  fontSize: '0.875rem'
                 }}
               >
                 Retry

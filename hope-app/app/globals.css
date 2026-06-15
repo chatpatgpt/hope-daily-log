@@ -167,19 +167,29 @@ body {
   font-size: 0.875rem;
 }
 
-/* Weather banner */
+/* Weather banner - Glass-morphism */
 .weather-banner {
   max-width: 600px;
   margin: 0 auto 1.5rem;
-  padding: 1rem 1.25rem;
-  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  color: var(--ink);
   animation: slideDown 0.3s ease;
+}
+
+.dark .weather-banner {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--ink);
 }
 
 .weather-info {
@@ -200,22 +210,25 @@ body {
 }
 
 .weather-temp {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
   line-height: 1;
+  color: var(--ink);
 }
 
 .weather-condition {
-  font-size: 0.75rem;
-  opacity: 0.9;
+  font-size: 0.875rem;
+  opacity: 0.75;
   font-weight: 500;
+  color: var(--muted);
 }
 
 .weather-recommendation {
   font-size: 0.875rem;
   font-weight: 600;
   text-align: right;
-  opacity: 0.95;
+  color: var(--ink);
+  opacity: 0.85;
 }
 
 @keyframes slideDown {
