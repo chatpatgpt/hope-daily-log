@@ -242,34 +242,23 @@ body {
 /* Contextual Dog Companion */
 .dog-track {
   position: relative;
-  height: 90px;
+  height: 120px;
   margin-bottom: 1.5rem;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
 }
 
 .dog-companion {
   position: relative;
-  bottom: 5px;
+  width: 120px;
+  height: 120px;
 }
 
-.dog-svg {
-  width: 100px;
-  height: 80px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-  transform-origin: 50% 90%;
-}
-
-.dog-shadow {
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 10px;
-  background: radial-gradient(ellipse, rgba(0,0,0,0.2) 0%, transparent 70%);
-  border-radius: 50%;
+.lottie-dog {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
 }
 
 /* Base animations - subtle life */
