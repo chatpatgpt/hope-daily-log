@@ -164,12 +164,18 @@ export default function Home() {
   } | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [locationError, setLocationError] = useState(false);
+  const [weatherFetchTime, setWeatherFetchTime] = useState<number>(0);
 
   useEffect(() => {
-    if (!weather && !weatherLoading && !locationError) {
+    // Fetch weather on mount or if stale (>15 min old)
+    const now = Date.now();
+    const fifteenMinutes = 15 * 60 * 1000;
+    const isStale = now - weatherFetchTime > fifteenMinutes;
+
+    if ((isStale || !weather) && !weatherLoading) {
       fetchWeather();
     }
-  }, [weather, weatherLoading, locationError]);
+  }, []); // Empty deps = runs only on mount (app open/refresh)
 
   async function fetchWeather() {
     setWeatherLoading(true);
@@ -300,6 +306,7 @@ export default function Home() {
         upcomingTime,
         recommendation
       });
+      setWeatherFetchTime(Date.now());
       setLocationError(false);
     } catch (err) {
       console.error('Weather error:', err);
