@@ -445,22 +445,23 @@ export default function Home() {
       {/* Info bar: streak + weather compact */}
       <div style={{
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
-        gap: '0.5rem',
+        gap: '0.375rem',
         marginBottom: '0.5rem',
-        flexShrink: 0,
-        flexWrap: 'wrap'
+        flexShrink: 0
       }}>
         <div className="streak-badge">
           <span>🔥</span>
           <span>{walkStreak} day{walkStreak !== 1 ? 's' : ''} streak</span>
         </div>
         {weatherLoading && (
-          <div className="weather-badge">🌤️ Loading...</div>
+          <div className="weather-badge">🌤️ Loading weather...</div>
         )}
         {weather && (
-          <div className="weather-badge">
+          <div className="weather-badge" style={{ textAlign: 'center' }}>
             {getWeatherRecommendation(weather.temp, weather.condition).emoji} {weather.temp}°F
+            {weather.location && ` · ${weather.location}`}
             {weather.upcomingCondition && ` · ${weather.upcomingCondition}`}
             {weather.recommendation && ` · ${weather.recommendation}`}
           </div>
