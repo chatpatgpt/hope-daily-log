@@ -288,7 +288,7 @@ export default function Home() {
         temp: tempF,
         condition: condition,
         icon: '',
-        feelsLike: feelsLikeF || tempF,
+        feelsLike: currentPeriod.windChill || currentPeriod.heatIndex || tempF,
         location: locationName,
         upcomingCondition,
         upcomingTime,
