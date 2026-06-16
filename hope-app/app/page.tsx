@@ -483,7 +483,7 @@ export default function Home() {
       <div className="dog-track">
         <div className="dog-slider">
           <div className="dog-companion">
-            <Lottie animationData={dogAnimation} loop={true} className="lottie-dog" />
+            <Lottie animationData={dogAnimation} loop={true} speed={0.4} className="lottie-dog" />
           </div>
         </div>
       </div>
