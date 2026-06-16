@@ -611,12 +611,12 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
                 {!isOtherMonth && !status.isFuture && (
                   <>
                     {status.poopCount > 0 && (
-                      <span style={{ fontSize: '0.85rem', lineHeight: 1, whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '0.6rem', lineHeight: 1, whiteSpace: 'nowrap' }}>
                         💩×{status.poopCount}
                       </span>
                     )}
                     {status.peeCount > 0 && (
-                      <span style={{ fontSize: '0.85rem', lineHeight: 1, whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '0.6rem', lineHeight: 1, whiteSpace: 'nowrap' }}>
                         💧×{status.peeCount}
                       </span>
                     )}
