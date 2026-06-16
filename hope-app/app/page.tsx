@@ -397,7 +397,7 @@ export default function Home() {
 
   return (
     <div className={darkMode ? 'dark' : ''} style={{
-      padding: '0.75rem 1rem',
+      padding: '0.75rem 1rem 5rem',
       maxWidth: '600px',
       margin: '0 auto'
     }}>
@@ -460,7 +460,9 @@ export default function Home() {
         )}
         {weather && (
           <div className="weather-badge">
-            {getWeatherRecommendation(weather.temp, weather.condition).emoji} {weather.temp}°F · {weather.recommendation || weather.upcomingCondition}
+            {getWeatherRecommendation(weather.temp, weather.condition).emoji} {weather.temp}°F
+            {weather.upcomingCondition && ` · ${weather.upcomingCondition}`}
+            {weather.recommendation && ` · ${weather.recommendation}`}
           </div>
         )}
         {locationError && !weather && (
@@ -499,6 +501,31 @@ export default function Home() {
           onDelete={deleteLog}
         />
       )}
+
+      {/* Sticky log button */}
+      <button
+        onClick={() => { setSelectedDay(new Date()); setShowModal(true); }}
+        style={{
+          position: 'fixed',
+          bottom: '1.5rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'var(--primary)',
+          color: 'white',
+          border: 'none',
+          borderRadius: '100px',
+          padding: '0.875rem 2rem',
+          fontSize: '1rem',
+          fontWeight: 600,
+          cursor: 'pointer',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+          zIndex: 50,
+          touchAction: 'manipulation',
+          whiteSpace: 'nowrap'
+        }}
+      >
+        🐾 Log today&apos;s walk
+      </button>
     </div>
   );
 }

@@ -158,7 +158,6 @@ body {
   color: var(--ink);
   font-weight: 500;
   font-size: 0.8rem;
-  white-space: nowrap;
 }
 
 /* Streak badge */
