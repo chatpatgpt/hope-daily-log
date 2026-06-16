@@ -459,11 +459,17 @@ export default function Home() {
           <div className="weather-badge">🌤️ Loading weather...</div>
         )}
         {weather && (
-          <div className="weather-badge" style={{ textAlign: 'center' }}>
-            {getWeatherRecommendation(weather.temp, weather.condition).emoji} {weather.temp}°F
-            {weather.location && ` · ${weather.location}`}
-            {weather.upcomingCondition && ` · ${weather.upcomingCondition}`}
-            {weather.recommendation && ` · ${weather.recommendation}`}
+          <div className="weather-badge" style={{ textAlign: 'center', flexDirection: 'column', gap: '0.2rem' }}>
+            <div>
+              {getWeatherRecommendation(weather.temp, weather.condition).emoji} {weather.temp}°F
+              {weather.location && ` · ${weather.location}`}
+              {weather.upcomingCondition && ` · ${weather.upcomingCondition}`}
+            </div>
+            {weather.recommendation && (
+              <div style={{ fontWeight: 600, color: 'var(--primary)' }}>
+                {weather.recommendation}
+              </div>
+            )}
           </div>
         )}
         {locationError && !weather && (
