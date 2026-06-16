@@ -199,7 +199,6 @@ export default function Home() {
       }
 
       const pointsData = await pointsResponse.json();
-      const observationStationsUrl = pointsData.properties.observationStations;
       const forecastHourlyUrl = pointsData.properties.forecastHourly;
 
       // Extract location info
@@ -207,99 +206,81 @@ export default function Home() {
       const state = pointsData.properties.relativeLocation?.properties?.state || '';
       const locationName = city && state ? `${city}, ${state}` : 'Your Location';
 
-      // Step 2: Get nearest observation station for current conditions
-      const stationsResponse = await fetch(observationStationsUrl);
-      if (!stationsResponse.ok) {
-        throw new Error(`Stations fetch failed: ${stationsResponse.status}`);
-      }
-
-      const stationsData = await stationsResponse.json();
-      const nearestStation = stationsData.features[0].id;
-
-      // Step 3: Get current observations
-      const observationUrl = `${nearestStation}/observations/latest`;
-      const obsResponse = await fetch(observationUrl);
-
-      if (!obsResponse.ok) {
-        throw new Error(`Observation fetch failed: ${obsResponse.status}`);
-      }
-
-      const obsData = await obsResponse.json();
-      const props = obsData.properties;
-
-      // Convert Celsius to Fahrenheit
-      const tempC = props.temperature.value;
-      const tempF = tempC !== null ? Math.round((tempC * 9/5) + 32) : null;
-      const feelsLikeC = props.heatIndex.value || props.windChill.value || tempC;
-      const feelsLikeF = feelsLikeC !== null ? Math.round((feelsLikeC * 9/5) + 32) : tempF;
-
-      const condition = props.textDescription || 'Clear';
-
-      if (tempF === null) {
-        throw new Error('Temperature data unavailable');
-      }
-
-      // Step 4: Get hourly forecast for next 3 hours
+      // Step 2: Get hourly forecast (forward-looking)
       const forecastResponse = await fetch(forecastHourlyUrl);
+
+      if (!forecastResponse.ok) {
+        throw new Error(`Forecast fetch failed: ${forecastResponse.status}`);
+      }
+
+      const forecastData = await forecastResponse.json();
+      const periods = forecastData.properties.periods;
+
+      if (!periods || periods.length === 0) {
+        throw new Error('No forecast data available');
+      }
+
+      // Use first period (current/next hour) for temperature and condition
+      const currentPeriod = periods[0];
+      const tempF = currentPeriod.temperature;
+      const condition = currentPeriod.shortForecast;
+
+      // Analyze next 3 hours for upcoming changes
+      const nextThreeHours = periods.slice(0, 3);
       let upcomingCondition = '';
       let upcomingTime = '';
       let recommendation = '';
 
-      if (forecastResponse.ok) {
-        const forecastData = await forecastResponse.json();
-        const periods = forecastData.properties.periods.slice(0, 3); // Next 3 hours
+      // Look for significant weather changes in next 3 hours
+      const hasRain = nextThreeHours.some((p: any) =>
+        p.shortForecast.toLowerCase().includes('rain') ||
+        p.shortForecast.toLowerCase().includes('shower') ||
+        p.shortForecast.toLowerCase().includes('storm')
+      );
 
-        // Look for significant weather changes
-        const hasRain = periods.some((p: any) =>
+      const hasSnow = nextThreeHours.some((p: any) =>
+        p.shortForecast.toLowerCase().includes('snow')
+      );
+
+      if (hasRain) {
+        const rainPeriod = nextThreeHours.find((p: any) =>
           p.shortForecast.toLowerCase().includes('rain') ||
-          p.shortForecast.toLowerCase().includes('shower') ||
-          p.shortForecast.toLowerCase().includes('storm')
+          p.shortForecast.toLowerCase().includes('shower')
         );
+        if (rainPeriod) {
+          const rainTime = new Date(rainPeriod.startTime);
+          const now = new Date();
+          const hoursUntil = Math.round((rainTime.getTime() - now.getTime()) / (1000 * 60 * 60));
 
-        const hasSnow = periods.some((p: any) =>
-          p.shortForecast.toLowerCase().includes('snow')
-        );
-
-        if (hasRain) {
-          const rainPeriod = periods.find((p: any) =>
-            p.shortForecast.toLowerCase().includes('rain') ||
-            p.shortForecast.toLowerCase().includes('shower')
-          );
-          if (rainPeriod) {
-            const rainTime = new Date(rainPeriod.startTime);
-            const now = new Date();
-            const hoursUntil = Math.round((rainTime.getTime() - now.getTime()) / (1000 * 60 * 60));
-
-            if (hoursUntil <= 0) {
-              upcomingCondition = 'Rain now';
-              recommendation = 'Quick walk recommended';
-            } else if (hoursUntil === 1) {
-              upcomingCondition = 'Rain in 1 hour';
-              recommendation = 'Walk soon!';
-            } else {
-              upcomingCondition = `Rain in ${hoursUntil} hours`;
-              recommendation = 'Good time to walk';
-            }
-            upcomingTime = rainTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-          }
-        } else if (hasSnow) {
-          upcomingCondition = 'Snow expected';
-          recommendation = 'Bundle up!';
-        } else {
-          // Check temperature trend
-          const lastPeriod = periods[periods.length - 1];
-          const tempChange = lastPeriod.temperature - tempF;
-
-          if (tempChange > 10) {
-            upcomingCondition = `Warming to ${lastPeriod.temperature}°F`;
-            recommendation = 'Walk now while cooler';
-          } else if (tempChange < -10) {
-            upcomingCondition = `Cooling to ${lastPeriod.temperature}°F`;
-            recommendation = 'Walk now while warmer';
+          if (hoursUntil <= 0) {
+            upcomingCondition = 'Rain now';
+            recommendation = 'Quick walk recommended';
+          } else if (hoursUntil === 1) {
+            upcomingCondition = 'Rain in 1 hour';
+            recommendation = 'Walk soon!';
           } else {
-            upcomingCondition = 'Clear for 3 hours';
-            recommendation = 'Great time to walk!';
+            upcomingCondition = `Rain in ${hoursUntil} hours`;
+            recommendation = 'Good time to walk';
           }
+          upcomingTime = rainTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        }
+      } else if (hasSnow) {
+        upcomingCondition = 'Snow expected';
+        recommendation = 'Bundle up!';
+      } else {
+        // Check temperature trend
+        const lastPeriod = nextThreeHours[nextThreeHours.length - 1];
+        const tempChange = lastPeriod.temperature - tempF;
+
+        if (tempChange > 10) {
+          upcomingCondition = `Warming to ${lastPeriod.temperature}°F`;
+          recommendation = 'Walk now while cooler';
+        } else if (tempChange < -10) {
+          upcomingCondition = `Cooling to ${lastPeriod.temperature}°F`;
+          recommendation = 'Walk now while warmer';
+        } else {
+          upcomingCondition = 'Clear for 3 hours';
+          recommendation = 'Great time to walk!';
         }
       }
 
