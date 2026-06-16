@@ -397,17 +397,21 @@ export default function Home() {
 
   return (
     <div className={darkMode ? 'dark' : ''} style={{
-      minHeight: '100vh',
-      padding: '1rem',
+      height: '100dvh',
+      padding: '0.75rem 1rem',
       maxWidth: '600px',
-      margin: '0 auto'
+      margin: '0 auto',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
     }}>
       {/* Header */}
       <header style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '2rem'
+        marginBottom: '0.5rem',
+        flexShrink: 0
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{
@@ -442,57 +446,36 @@ export default function Home() {
         </button>
       </header>
 
-      {/* Streak & Weather */}
-      <div style={{ marginBottom: '2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+      {/* Info bar: streak + weather compact */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        marginBottom: '0.5rem',
+        flexShrink: 0,
+        flexWrap: 'wrap'
+      }}>
         <div className="streak-badge">
           <span>🔥</span>
           <span>{walkStreak} day{walkStreak !== 1 ? 's' : ''} streak</span>
         </div>
-
-        {/* Compact Weather Badge */}
         {weatherLoading && (
-          <div className="weather-compact">
-            <span>🌤️</span>
-            <span>Loading weather...</span>
-          </div>
+          <div className="weather-badge">🌤️ Loading...</div>
         )}
-
         {weather && (
-          <div className="weather-card">
-            {/* Line 1: Most urgent/actionable info */}
-            <div className="weather-primary">
-              <span className="weather-icon">{getWeatherRecommendation(weather.temp, weather.condition).emoji}</span>
-              <span className="weather-main-text">
-                {weather.upcomingCondition || 'Clear conditions'}
-              </span>
-            </div>
-
-            {/* Line 2: Context (location + temp) */}
-            <div className="weather-context">
-              {weather.location && <span>{weather.location}</span>}
-              {weather.location && <span className="weather-dot">•</span>}
-              <span>{weather.temp}°F</span>
-            </div>
-
-            {/* Line 3: Action/recommendation */}
-            {weather.recommendation && (
-              <div className="weather-action">
-                {weather.recommendation}
-              </div>
-            )}
+          <div className="weather-badge">
+            {getWeatherRecommendation(weather.temp, weather.condition).emoji} {weather.temp}°F · {weather.recommendation || weather.upcomingCondition}
           </div>
         )}
-
         {locationError && !weather && (
-          <div className="weather-compact" style={{ cursor: 'pointer' }} onClick={fetchWeather}>
-            <span>⚠️</span>
-            <span>Tap to retry weather</span>
+          <div className="weather-badge" style={{ cursor: 'pointer' }} onClick={fetchWeather}>
+            ⚠️ Tap for weather
           </div>
         )}
       </div>
 
       {/* Contextual Dog */}
-      <div className="dog-track">
+      <div className="dog-track" style={{ flexShrink: 0 }}>
         <div className={`dog-companion dog-${dogState}`}>
           <Lottie
             animationData={dogAnimation}
@@ -502,13 +485,15 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Calendar */}
-      <CalendarView
-        currentMonth={currentMonth}
-        setCurrentMonth={setCurrentMonth}
-        logs={logs}
-        onDayClick={handleDayClick}
-      />
+      {/* Calendar — fills remaining space */}
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <CalendarView
+          currentMonth={currentMonth}
+          setCurrentMonth={setCurrentMonth}
+          logs={logs}
+          onDayClick={handleDayClick}
+        />
+      </div>
 
       {/* Day Modal */}
       {showModal && selectedDay && (
@@ -579,32 +564,33 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
   }
 
   return (
-    <div className="card">
+    <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0.75rem' }}>
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '1.5rem'
+        marginBottom: '0.5rem',
+        flexShrink: 0
       }}>
-        <button onClick={prevMonth} className="btn btn-secondary" style={{ padding: '0.5rem 0.75rem' }}>
+        <button onClick={prevMonth} className="btn btn-secondary" style={{ padding: '0.375rem 0.625rem', fontSize: '0.8rem' }}>
           ←
         </button>
-        <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--ink)' }}>
+        <h2 style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--ink)' }}>
           {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </h2>
-        <button onClick={nextMonth} className="btn btn-secondary" style={{ padding: '0.5rem 0.75rem' }}>
+        <button onClick={nextMonth} className="btn btn-secondary" style={{ padding: '0.375rem 0.625rem', fontSize: '0.8rem' }}>
           →
         </button>
       </div>
 
-      <div className="calendar-grid" style={{ marginBottom: '0.5rem' }}>
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+      <div className="calendar-grid" style={{ marginBottom: '0.25rem', flexShrink: 0 }}>
+        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
           <div key={day} style={{
             textAlign: 'center',
-            fontSize: '0.75rem',
+            fontSize: '0.7rem',
             fontWeight: 600,
             color: 'var(--muted)',
-            padding: '0.5rem 0',
+            padding: '0.2rem 0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -614,7 +600,7 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
         ))}
       </div>
 
-      <div className="calendar-grid">
+      <div className="calendar-grid calendar-grid-days">
         {days.map(date => {
           const status = getDayStatus(date);
           const isOtherMonth = date.getMonth() !== currentMonth.getMonth();
@@ -651,24 +637,18 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
       </div>
 
       <div style={{
-        marginTop: '1.5rem',
-        paddingTop: '1.5rem',
+        marginTop: '0.375rem',
+        paddingTop: '0.375rem',
         borderTop: '1px solid var(--border)',
         display: 'flex',
-        gap: '1rem',
-        flexWrap: 'wrap',
-        fontSize: '0.75rem',
-        color: 'var(--muted)'
+        gap: '0.75rem',
+        fontSize: '0.7rem',
+        color: 'var(--muted)',
+        flexShrink: 0
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-          <span>💩</span> Pooped
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-          <span>💧</span> Peed
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-          <span style={{ color: 'var(--error)' }}>✕</span> Missed
-        </div>
+        <span>💩 Pooped</span>
+        <span>💧 Peed</span>
+        <span style={{ color: 'var(--error)' }}>✕ Missed</span>
       </div>
     </div>
   );

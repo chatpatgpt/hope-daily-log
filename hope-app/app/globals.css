@@ -55,28 +55,26 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  transition: all 0.15s ease;
-  position: relative;
+  transition: background 0.15s ease;
   background: var(--surface);
   border: 1px solid var(--border);
-  min-height: 60px;
-  padding: 0.25rem;
+  padding: 0.2rem;
   box-sizing: border-box;
   overflow: hidden;
-  aspect-ratio: 1;
+  height: 100%;
+  width: 100%;
 }
 
-/* Fallback for browsers without aspect-ratio support */
-@supports not (aspect-ratio: 1) {
-  .calendar-day {
-    height: 60px;
-  }
+.calendar-grid-days {
+  flex: 1;
+  min-height: 0;
+  grid-auto-rows: 1fr;
 }
 
 .calendar-day:hover:not(.disabled) {
@@ -152,6 +150,21 @@ body {
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: var(--shadow);
+}
+
+/* Weather badge (compact, inline with streak) */
+.weather-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 100px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-weight: 500;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 /* Streak badge */
@@ -311,8 +324,8 @@ body {
 /* Contextual Dog Companion */
 .dog-track {
   position: relative;
-  height: 120px;
-  margin-bottom: 1.5rem;
+  height: 60px;
+  margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -320,8 +333,8 @@ body {
 
 .dog-companion {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 60px;
+  height: 60px;
 }
 
 .lottie-dog {
