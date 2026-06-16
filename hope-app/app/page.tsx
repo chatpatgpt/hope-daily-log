@@ -158,6 +158,7 @@ export default function Home() {
     condition: string;
     icon: string;
     feelsLike: number;
+    location?: string;
     upcomingCondition?: string;
     upcomingTime?: string;
     recommendation?: string;
@@ -200,6 +201,11 @@ export default function Home() {
       const pointsData = await pointsResponse.json();
       const observationStationsUrl = pointsData.properties.observationStations;
       const forecastHourlyUrl = pointsData.properties.forecastHourly;
+
+      // Extract location info
+      const city = pointsData.properties.relativeLocation?.properties?.city || '';
+      const state = pointsData.properties.relativeLocation?.properties?.state || '';
+      const locationName = city && state ? `${city}, ${state}` : 'Your Location';
 
       // Step 2: Get nearest observation station for current conditions
       const stationsResponse = await fetch(observationStationsUrl);
@@ -302,6 +308,7 @@ export default function Home() {
         condition: condition,
         icon: '',
         feelsLike: feelsLikeF || tempF,
+        location: locationName,
         upcomingCondition,
         upcomingTime,
         recommendation
@@ -472,6 +479,12 @@ export default function Home() {
         {weather && (
           <div className="weather-compact">
             <span>{getWeatherRecommendation(weather.temp, weather.condition).emoji}</span>
+            {weather.location && (
+              <>
+                <span style={{ fontWeight: 600 }}>{weather.location}</span>
+                <span className="weather-dot">•</span>
+              </>
+            )}
             <span>{weather.temp}°F</span>
             {weather.upcomingCondition && (
               <>
