@@ -67,14 +67,8 @@ body {
   padding: 0.2rem;
   box-sizing: border-box;
   overflow: hidden;
-  height: 100%;
-  width: 100%;
-}
-
-.calendar-grid-days {
-  flex: 1;
-  min-height: 0;
-  grid-auto-rows: 1fr;
+  aspect-ratio: 1;
+  min-height: 44px;
 }
 
 .calendar-day:hover:not(.disabled) {

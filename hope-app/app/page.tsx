@@ -397,13 +397,9 @@ export default function Home() {
 
   return (
     <div className={darkMode ? 'dark' : ''} style={{
-      height: '100dvh',
       padding: '0.75rem 1rem',
       maxWidth: '600px',
-      margin: '0 auto',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden'
+      margin: '0 auto'
     }}>
       {/* Header */}
       <header style={{
@@ -475,7 +471,7 @@ export default function Home() {
       </div>
 
       {/* Contextual Dog */}
-      <div className="dog-track" style={{ flexShrink: 0 }}>
+      <div className="dog-track">
         <div className={`dog-companion dog-${dogState}`}>
           <Lottie
             animationData={dogAnimation}
@@ -485,15 +481,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Calendar — fills remaining space */}
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <CalendarView
-          currentMonth={currentMonth}
-          setCurrentMonth={setCurrentMonth}
-          logs={logs}
-          onDayClick={handleDayClick}
-        />
-      </div>
+      {/* Calendar */}
+      <CalendarView
+        currentMonth={currentMonth}
+        setCurrentMonth={setCurrentMonth}
+        logs={logs}
+        onDayClick={handleDayClick}
+      />
 
       {/* Day Modal */}
       {showModal && selectedDay && (
@@ -564,13 +558,12 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
   }
 
   return (
-    <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0.75rem' }}>
+    <div className="card" style={{ padding: '0.75rem' }}>
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '0.5rem',
-        flexShrink: 0
+        marginBottom: '0.5rem'
       }}>
         <button onClick={prevMonth} className="btn btn-secondary" style={{ padding: '0.375rem 0.625rem', fontSize: '0.8rem' }}>
           ←
@@ -583,7 +576,7 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
         </button>
       </div>
 
-      <div className="calendar-grid" style={{ marginBottom: '0.25rem', flexShrink: 0 }}>
+      <div className="calendar-grid" style={{ marginBottom: '0.25rem' }}>
         {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
           <div key={day} style={{
             textAlign: 'center',
@@ -600,7 +593,7 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
         ))}
       </div>
 
-      <div className="calendar-grid calendar-grid-days">
+      <div className="calendar-grid">
         {days.map(date => {
           const status = getDayStatus(date);
           const isOtherMonth = date.getMonth() !== currentMonth.getMonth();
@@ -644,7 +637,6 @@ function CalendarView({ currentMonth, setCurrentMonth, logs, onDayClick }: {
         gap: '0.75rem',
         fontSize: '0.7rem',
         color: 'var(--muted)',
-        flexShrink: 0
       }}>
         <span>💩 Pooped</span>
         <span>💧 Peed</span>
