@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase, type HopeLog } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import Lottie from 'lottie-react';
@@ -147,6 +147,11 @@ export default function Home() {
       return 'expectant'; // No streak, no walk today
     }
   }, [logs, walkStreak]);
+
+  const dogLottieRef = useRef<any>(null);
+  useEffect(() => {
+    if (dogLottieRef.current) dogLottieRef.current.setSpeed(0.4);
+  }, []);
 
   const hasWalkedToday = useMemo(() => {
     const today = new Date().toDateString();
@@ -483,7 +488,7 @@ export default function Home() {
       <div className="dog-track">
         <div className="dog-slider">
           <div className="dog-companion">
-            <Lottie animationData={dogAnimation} loop={true} speed={0.4} className="lottie-dog" />
+            <Lottie animationData={dogAnimation} loop={true} lottieRef={dogLottieRef} className="lottie-dog" />
           </div>
         </div>
       </div>
