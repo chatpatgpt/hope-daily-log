@@ -458,26 +458,27 @@ export default function Home() {
         )}
 
         {weather && (
-          <div className="weather-compact">
-            <span>{getWeatherRecommendation(weather.temp, weather.condition).emoji}</span>
-            {weather.location && (
-              <>
-                <span style={{ fontWeight: 600 }}>{weather.location}</span>
-                <span className="weather-dot">•</span>
-              </>
-            )}
-            <span>{weather.temp}°F</span>
-            {weather.upcomingCondition && (
-              <>
-                <span className="weather-dot">•</span>
-                <span>{weather.upcomingCondition}</span>
-              </>
-            )}
+          <div className="weather-card">
+            {/* Line 1: Most urgent/actionable info */}
+            <div className="weather-primary">
+              <span className="weather-icon">{getWeatherRecommendation(weather.temp, weather.condition).emoji}</span>
+              <span className="weather-main-text">
+                {weather.upcomingCondition || 'Clear conditions'}
+              </span>
+            </div>
+
+            {/* Line 2: Context (location + temp) */}
+            <div className="weather-context">
+              {weather.location && <span>{weather.location}</span>}
+              {weather.location && <span className="weather-dot">•</span>}
+              <span>{weather.temp}°F</span>
+            </div>
+
+            {/* Line 3: Action/recommendation */}
             {weather.recommendation && (
-              <>
-                <span className="weather-dot">•</span>
-                <span style={{ fontWeight: 600 }}>{weather.recommendation}</span>
-              </>
+              <div className="weather-action">
+                {weather.recommendation}
+              </div>
             )}
           </div>
         )}
