@@ -314,18 +314,31 @@ body {
   border-color: var(--muted);
 }
 
-/* Contextual Dog Companion */
+/* Dog running across the screen */
 .dog-track {
   position: relative;
   height: 60px;
   margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.dog-slider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  animation: dogSlide 7s linear infinite;
+}
+
+@keyframes dogSlide {
+  0%     { left: -70px; }
+  55%    { left: calc(100% + 10px); }
+  55.1%  { left: -70px; }
+  100%   { left: -70px; }
 }
 
 .dog-companion {
-  position: relative;
   width: 60px;
   height: 60px;
 }

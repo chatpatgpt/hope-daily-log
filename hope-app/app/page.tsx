@@ -479,14 +479,12 @@ export default function Home() {
         )}
       </div>
 
-      {/* Contextual Dog */}
+      {/* Dog running across */}
       <div className="dog-track">
-        <div className={`dog-companion dog-${dogState}`}>
-          <Lottie
-            animationData={dogAnimation}
-            loop={true}
-            className="lottie-dog"
-          />
+        <div className="dog-slider">
+          <div className="dog-companion">
+            <Lottie animationData={dogAnimation} loop={true} className="lottie-dog" />
+          </div>
         </div>
       </div>
 
